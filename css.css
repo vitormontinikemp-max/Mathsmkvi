@@ -594,37 +594,6 @@ hr {
     transform: scale(1.1);
 }
 
-/* ===== SOBRE O CRIADOR ===== */
-#aboutthecreator {
-    color: black;
-    background: white;
-    padding: 25px 30px;
-    border-radius: 15px;
-    border: 2px solid black;
-    box-shadow: var(--shadow);
-    width: 420px;
-    max-width: 95%;
-    text-align: left;
-    transition: var(--transition);
-    flex-basis: 100%;
-    margin-left: 0;
-    margin-right: auto;
-}
-
-#aboutthecreator:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--hover-shadow);
-}
-
-#h4sobreCreator {
-    color: rgb(68, 68, 68);
-    font-weight: 500;
-    line-height: 1.6;
-    text-shadow: 
-        0px 1px 2px rgba(0, 0, 0, 0.3),
-        0px 2px 4px rgba(0, 0, 0, 0.3);
-    letter-spacing: 0.3px;
-}
 
 #imagemkvi {
     text-align: center;
@@ -787,16 +756,7 @@ body.dark-mode .menu-toggle:hover {
     background: #777;
 }
 
-body.dark-mode #aboutthecreator {
-    color: white;
-    background: var(--dark-container-bg);
-    border: 2px solid var(--dark-border-color);
-    box-shadow: 0 10px 25px rgba(138,138,138,0.4);
-}
 
-body.dark-mode #aboutthecreator:hover {
-    box-shadow: 0 15px 30px rgba(255,255,255,0.5);
-}
 
 body.dark-mode .open-calc {
     background: #505050;
@@ -873,4 +833,5 @@ body.dark-mode .unit-circle-container {
     #mathTipsContainer {
         width: 95%;
     }
+
 }
