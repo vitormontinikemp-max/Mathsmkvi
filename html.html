@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link id="icone" rel="icon" type="image/jpeg" href="https://i.postimg.cc/PrypnSYM/mkvi-math.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mkvi Math Solver</title>
+    <link rel="stylesheet" href="css.css">
+</head>
+
+<body>
+    <!-- ===== MAIN CONTAINER ===== -->
+    <div class="container">
+        <h1 id="ms">Math Solver</h1>
+        <h4>Choose the equation type:</h4>
+
+        <select id="tipoEquacao" onchange="mostrarSeção()">
+            <option value="">Select</option>
+            <option value="linear">Linear equation</option>
+            <option value="quadratic">Quadratic equation</option>
+            <option value="cubic">Cubic equation</option>
+            <option value="quartic">Quartic equation</option>
+            <option value="exponential">Exponential equation</option>
+            <option value="logarithmic">Logarithmic equation</option>
+            <option value="trigonometric">Trigonometric equation</option>
+        </select>
+
+        <!-- ===== LINEAR EQUATION ===== -->
+        <div id="linear" class="secao" style="display:none;">
+            <h1>• Linear Equation Solver</h1>
+
+            <div class="coeficientes-container">
+                <div class="coeficiente-input">
+                    <label for="linearA">a:</label>
+                    <input type="text" id="linearA" placeholder="ex: 2, 3" step="any">
+                    <span class="variavel">x</span>
+                </div>
+
+                <div class="coeficiente-input">
+                    <label for="linearB">b:</label>
+                    <input type="text" id="linearB" placeholder="ex: 1, -4" step="any">
+                </div>
+
+                <div class="igualdade">=</div>
+
+                <div class="coeficiente-input">
+                    <label for="linearC">c:</label>
+                    <input type="text" id="linearC" placeholder="ex: 7, 8" step="any">
+                </div>
+            </div>
+
+            <button onclick="resolverLinear()">Solve</button>
+
+            <div class="exemplos">
+                <p>Examples:</p>
+                <button onclick="usarExemploLinear(2, 3, 7)">\( 2x + 3 = 7 \)</button>
+                <button onclick="usarExemploLinear(3, -1, 8)">\( 3x - 1 = 8 \)</button>
+                <button onclick="usarExemploLinear(4, 2, 10)">\( 4x + 2 = 10 \)</button>
+                <button onclick="usarExemploLinear(1, 5, 0)">\( x + 5 = 0 \)</button>
+            </div>
+
+            <div id="passos"></div>
+        </div>
+
+        <!-- ===== QUADRATIC EQUATION ===== -->
+        <div id="quadratic" class="secao" style="display:none;">
+            <h1>• Quadratic Equation Solver</h1>
+
+            <div class="coeficientes-container">
+                <div class="coeficiente-input">
+                    <label for="quadraticA">a:</label>
+                    <input type="text" id="quadraticA" placeholder="ex: 1, 2" step="any">
+                    <span class="variavel">x²</span>
+                </div>
+
+                <div class="coeficiente-input">
+                    <label for="quadraticB">b:</label>
+                    <input type="text" id="quadraticB" placeholder="ex: -3, 5" step="any">
+                    <span class="variavel">x</span>
+                </div>
+
+                <div class="coeficiente-input">
+                    <label for="quadraticC">c:</label>
+                    <input type="text" id="quadraticC" placeholder="ex: 2, -6" step="any">
+                </div>
+
+                <div class="igualdade">=</div>
+
+                <div class="coeficiente-input">
+                    <label for="quadraticD">d:</label>
+                    <input type="text" id="quadraticD" placeholder="ex: 0" step="any" value="0">
+                </div>
+            </div>
+
+            <button onclick="resolverQuadratic()">Solve</button>
+
+            <div class="exemplos">
+                <p>Examples:</p>
+                <button onclick="usarExemploQuadratic(1, -3, 2, 0)">\( x^2 - 3x + 2 = 0 \)</button>
+                <button onclick="usarExemploQuadratic(1, -5, 6, 0)">\( x^2 - 5x + 6 = 0 \)</button>
+                <button onclick="usarExemploQuadratic(1, 2, -3, 0)">\( x^2 + 2x - 3 = 0 \)</button>
+                <button onclick="usarExemploQuadratic(1, -1, -6, 0)">\( x^2 - x - 6 = 0 \)</button>
+            </div>
+
+            <div id="quadraticSteps"></div>
+        </div>
+
+        <!-- ===== CUBIC EQUATION ===== -->
+        <div id="cubic" class="secao" style="display:none;">
+            <h1>• Cubic Equation Solver</h1>
+
+            <div class="coeficientes-container">
+                <div class="coeficiente-input">
+                    <label for="cubicA">a:</label>
+                    <input type="text" id="cubicA" placeholder="ex: 1, 2" step="any">
+                    <span class="variavel">x³</span>
+                </div>
+
+                <div class="coeficiente-input">
+                    <label for="cubicB">b:</label>
+                    <input type="text" id="cubicB" placeholder="ex: 0, -3" step="any">
+                    <span class="variavel">x²</span>
+                </div>
+
+                <div class="coeficiente-input">
+                    <label for="cubicC">c:</label>
+                    <input type="text" id="cubicC" placeholder="ex: -2, 6" step="any">
+                    <span class="variavel">x</span>
+                </div>
+
+                <div class="coeficiente-input">
+                    <label for="cubicD">d:</label>
+                    <input type="text" id="cubicD" placeholder="ex: 0, 2" step="any">
+                </div>
+
+                <div class="igualdade">=</div>
+
+                <div class="coeficiente-input">
+                    <label for="cubicE">e:</label>
+                    <input type="text" id="cubicE" placeholder="ex: 0" step="any" value="0">
+                </div>
+            </div>
+
+            <button onclick="resolverCubic()">Solve</button>
+
+            <div class="exemplos">
+                <p>Examples:</p>
+                <button onclick="usarExemploCubic(1, 0, -4, 0, 0)">\( x^3 - 4x = 0 \)</button>
+                <button onclick="usarExemploCubic(1, -6, 11, -6, 0)">\( x^3 - 6x^2 + 11x - 6 = 0 \)</button>
+                <button onclick="usarExemploCubic(1, -3, 0, 2, 0)">\( x^3 - 3x^2 + 2 = 0 \)</button>
+                <button onclick="usarExemploCubic(1, 0, -9, 0, 0)">\( x^3 - 9x = 0 \)</button>
+            </div>
+
+            <div id="cubicSteps"></div>
+        </div>
+
+        <!-- ===== QUARTIC EQUATION ===== -->
+        <div id="quartic" class="secao" style="display:none;">
+            <h1>• Quartic Equation Solver</h1>
+
+            <div class="coeficientes-container">
+                <div class="coeficiente-input">
+                    <label for="quarticA">a:</label>
+                    <input type="text" id="quarticA" placeholder="ex: 1, 2" step="any">
+                    <span class="variavel">x⁴</span>
+                </div>
+
+                <div class="coeficiente-input">
+                    <label for="quarticB">b:</label>
+                    <input type="text" id="quarticB" placeholder="ex: 0, 3" step="any">
+                    <span class="variavel">x³</span>
+                </div>
+
+                <div class="coeficiente-input">
+                    <label for="quarticC">c:</label>
+                    <input type="text" id="quarticC" placeholder="ex: -3, 5" step="any">
+                    <span class="variavel">x²</span>
+                </div>
+
+                <div class="coeficiente-input">
+                    <label for="quarticD">d:</label>
+                    <input type="text" id="quarticD" placeholder="ex: 0, 1" step="any">
+                    <span class="variavel">x</span>
+                </div>
+
+                <div class="coeficiente-input">
+                    <label for="quarticE">e:</label>
+                    <input type="text" id="quarticE" placeholder="ex: 1, 4" step="any">
+                </div>
+
+                <div class="igualdade">=</div>
+
+                <div class="coeficiente-input">
+                    <label for="quarticF">f:</label>
+                    <input type="text" id="quarticF" placeholder="ex: 0" step="any" value="0">
+                </div>
+            </div>
+
+            <button onclick="resolverQuartic()">Solve</button>
+
+            <div class="exemplos">
+                <p>Examples:</p>
+                <button onclick="usarExemploQuartic(1, 0, -5, 0, 4, 0)">\( x^4 - 5x^2 + 4 = 0 \)</button>
+                <button onclick="usarExemploQuartic(1, 0, -13, 0, 36, 0)">\( x^4 - 13x^2 + 36 = 0 \)</button>
+                <button onclick="usarExemploQuartic(1, 0, -10, 0, 9, 0)">\( x^4 - 10x^2 + 9 = 0 \)</button>
+                <button onclick="usarExemploQuartic(1, 0, -8, 0, 16, 0)">\( x^4 - 8x^2 + 16 = 0 \)</button>
+            </div>
+
+            <div id="quarticSteps"></div>
+        </div>
+
+        <!-- ===== EXPONENTIAL EQUATION ===== -->
+        <div id="exponential" class="secao" style="display:none;">
+            <h1>• Exponential Equation Solver</h1>
+
+            <div class="coeficientes-container">
+                <div class="coeficiente-input">
+                    <label for="expQ">Q:</label>
+                    <input type="text" id="expQ" placeholder="ex: 8, 16" step="any">
+                </div>
+
+                <div class="igualdade">=</div>
+
+                <div class="coeficiente-input">
+                    <label for="expQ0">Q₀:</label>
+                    <input type="text" id="expQ0" placeholder="ex: 2, 1" step="any">
+                </div>
+
+                <div class="coeficiente-input">
+                    <label for="expA">a:</label>
+                    <input type="text" id="expA" placeholder="ex: 2, 3" step="any">
+                </div>
+
+                <div class="coeficiente-input">
+                    <span class="variavel">^</span>
+                    <label for="expT">t:</label>
+                    <input type="text" id="expT" placeholder="ex: 3, 2" step="any">
+                </div>
+            </div>
+
+            <button onclick="resolverExponential()">Solve</button>
+
+            <div class="exemplos">
+                <p>Examples:</p>
+                <button onclick="usarExemploExponential(8, 2, 2, '')">\( 8 = 2 \times 2^t \)</button>
+                <button onclick="usarExemploExponential(16, 1, 2, '')">\( 16 = 1 \times 2^t \)</button>
+                <button onclick="usarExemploExponential(27, '', 3, 3)">\( 27 = Q₀ \times 3^3 \)</button>
+                <button onclick="usarExemploExponential('', 2, 2, 4)">\( Q = 2 \times 2^4 \)</button>
+            </div>
+
+            <div id="exponentialSteps"></div>
+        </div>
+
+        <!-- ===== LOGARITHMIC EQUATION ===== -->
+        <div id="logarithmic" class="secao" style="display:none;">
+            <h1>• Logarithmic Equation Solver</h1>
+
+            <div class="coeficientes-container">
+                <div class="coeficiente-input">
+                    <label for="logBase">log</label>
+                    <input type="text" id="logBase" placeholder="ex: 2, 3" step="any">
+                </div>
+
+                <div class="coeficiente-input">
+                    <label for="logArgument">(</label>
+                    <input type="text" id="logArgument" placeholder="ex: 8, 9" step="any">
+                    <label for="logArgument">)</label>
+                </div>
+
+                <div class="igualdade">=</div>
+
+                <div class="coeficiente-input">
+                    <label for="logResult">result:</label>
+                    <input type="text" id="logResult" placeholder="ex: 3, 2" step="any">
+                </div>
+            </div>
+
+            <button onclick="resolverLogarithmic()">Solve</button>
+
+            <div class="exemplos">
+                <p>Examples:</p>
+                <button onclick="usarExemploLogarithmic(2, 8, '')">\( \log_{2}(8) = x \)</button>
+                <button onclick="usarExemploLogarithmic(3, '', 2)">\( \log_{3}(x) = 2 \)</button>
+                <button onclick="usarExemploLogarithmic('', 100, 2)">\( \log_{b}(100) = 2 \)</button>
+                <button onclick="usarExemploLogarithmic(5, 25, '')">\( \log_{5}(25) = x \)</button>
+            </div>
+
+            <div id="logarithmicSteps"></div>
+        </div>
+
+        <!-- ===== TRIGONOMETRIC EQUATION ===== -->
+        <div id="trigonometric" class="secao" style="display:none;">
+            <h1>• Trigonometric Equation Solver</h1>
+
+            <div class="coeficientes-container">
+                <div class="coeficiente-input">
+                    <select id="trigFunction">
+                        <option value="sin">sin</option>
+                        <option value="cos">cos</option>
+                        <option value="tan">tan</option>
+                        <option value="sec">sec</option>
+                        <option value="csc">csc</option>
+                        <option value="cot">cot</option>
+                    </select>
+                </div>
+
+                <div class="coeficiente-input">
+                    <label for="trigAngle">(</label>
+                    <input type="text" id="trigAngle" placeholder="ex: 30, 45, 60" step="any">
+                    <label for="trigAngle">)</label>
+                </div>
+
+                <div class="igualdade">=</div>
+
+                <div class="coeficiente-input">
+                    <label for="trigValue">value:</label>
+                    <input type="text" id="trigValue" placeholder="ex: 0.5, 1" step="any">
+                </div>
+            </div>
+
+            <button onclick="resolverTrigonometric()">Solve</button>
+
+            <div class="exemplos">
+                <p>Examples:</p>
+                <button onclick="usarExemploTrigonometric('sin', 30, '')">\( \sin(30°) = x \)</button>
+                <button onclick="usarExemploTrigonometric('cos', '', '1/2')">\( \cos(\theta) = \frac{1}{2} \)</button>
+                <button onclick="usarExemploTrigonometric('tan', 45, '')">\( \tan(45°) = x \)</button>
+                <button onclick="usarExemploTrigonometric('sin', '', '√3/2')">\( \sin(\theta) = \frac{\sqrt{3}}{2} \)</button>
+            </div>
+
+            <div id="trigonometricSteps"></div>
+        </div>
+    </div>
+
+    <!-- ===== DIGITAL BLACKBOARD ===== -->
+    <div class="lousa-container" id="lousaContainer" style="display: none;">
+        <canvas id="lousa" width="1000" height="400"></canvas>
+
+        <div class="tools">
+            <button id="pencil">Pencil ✏️</button>
+            <button id="eraser">Eraser 🧽</button>
+            <button id="clear">Clear All 🧼</button>
+        </div>
+    </div>
+
+    <!-- ===== CALCULATOR MODAL ===== -->
+    <div id="calcModal" class="calc-modal">
+        <div class="calc-container">
+            <div class="calc-display">
+                <input type="text" id="calcInput" readonly placeholder="0">
+            </div>
+
+            <div class="calc-buttons">
+                <!-- Numbers and basic operations -->
+                <button onclick="calcAppend('7')">\( 7 \)</button>
+                <button onclick="calcAppend('8')">\( 8 \)</button>
+                <button onclick="calcAppend('9')">\( 9 \)</button>
+                <button onclick="calcAppend('/')">\( \div \)</button>
+
+                <button onclick="calcAppend('4')">\( 4 \)</button>
+                <button onclick="calcAppend('5')">\( 5 \)</button>
+                <button onclick="calcAppend('6')">\( 6 \)</button>
+                <button onclick="calcAppend('*')">\( \times \)</button>
+
+                <button onclick="calcAppend('1')">\( 1 \)</button>
+                <button onclick="calcAppend('2')">\( 2 \)</button>
+                <button onclick="calcAppend('3')">\( 3 \)</button>
+                <button onclick="calcAppend('-')">\( - \)</button>
+
+                <button onclick="calcAppend('0')">\( 0 \)</button>
+                <button onclick="calcAppend('.')">\( . \)</button>
+                <button onclick="calcCalculate()">\( = \)</button>
+                <button onclick="calcAppend('+')">\( + \)</button>
+
+                <!-- Special functions -->
+                <button onclick="calcSqrt()">\( \sqrt{} \)</button>
+                <button onclick="calcAppend('**')"> ^ </button>
+                <button onclick="calcAppend('(')">\( ( \)</button>
+                <button onclick="calcAppend(')')">\( ) \)</button>
+                <button onclick="calcClear()" class="span-two">\( C \)</button>
+            </div>
+
+            <button id="closeCalc">\( \text{Close} \)</button>
+        </div>
+    </div>
+
+    <!-- ===== MATH CONTENT ===== -->
+    <div id="mathTipsContainer">
+        <h1>Math Content</h1>
+        <h4 id="h44">
+            "This section covers the essential mathematics topics that every high school student should know."
+        </h4>
+
+        <div class="mathTipsContent">
+            <label for="topicSelect"><strong>Choose a topic:</strong></label>
+
+            <select id="topicSelect" onchange="mostrarConteudo()">
+                <option value="">-- Select --</option>
+                <option value="1">Numbers and Algebraic Expressions</option>
+                <option value="2">Equations and Inequalities</option>
+                <option value="3">Functions and Graphs</option>
+                <option value="4">Progressions and Sequences</option>
+                <option value="5">Trigonometry</option>
+                <option value="6">Analytic Geometry</option>
+                <option value="7">Plane Geometry</option>
+                <option value="8">Spatial Geometry</option>
+                <option value="9">Matrices and Determinants</option>
+                <option value="10">Combinatorics and Probability</option>
+                <option value="11">Set Theory and Logic</option>
+            </select>
+
+            <div id="conteudoSelecionado"></div>
+
+            <h4>
+                "Note: There are more contents within this topic, but these are the most important to know."
+            </h4>
+        </div>
+    </div>
+    
+    <h3></h3>
+    
+    <!-- ===== SIDEBAR MENU ===== -->
+    <div>
+        <button id="toggleMenu" class="menu-toggle">☰</button>
+        
+        <nav class="sidebar" id="sidebar">
+            <ul>
+                <li><a href="#">Solver and Blackboard</a></li>
+                <li><a href="#mathTipsContainer">Math Content</a></li>
+                <li><a href="#aboutthecreator">About the Creator</a></li>
+            </ul>
+
+            <div>
+                <button id="openCalc" class="open-calc">\( \text{Calculator} \)</button>
+            </div>
+
+            <div>
+                <button class="abrir-lousa-container" id="abrirLousa">Open Blackboard</button>
+            </div>
+
+            <div>
+                <button id="fecharLousa">Close Blackboard</button>
+            </div>
+
+            <div id="imagemkvi">
+                <img src="https://i.postimg.cc/PrypnSYM/mkvi-math.png" border="0" alt="mkvi-math" />
+            </div>
+
+            <div id="dl">
+                <button id="toggleTheme">💡DARK | LIGHT</button>
+                <div id="sparks"></div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- ===== ABOUT THE CREATOR ===== -->
+    <div id="aboutthecreator">
+        <h2>About the Creator</h2>
+
+        <h4 id="h4sobreCreator">
+            Hello! My name is Vitor, but you can call me MKVI.
+            I'm 15 years old and from Brazil. Here in Brazil, we face a big problem:
+            our education system is not very strong, especially in mathematics.
+            Because of this, I created this project to help students
+            solve math problems and learn mathematical concepts.
+            I hope you like it and find it useful.
+            Thank you for your attention! ^_^
+        </h4>
+    </div>
+    
+    
+    
+    <!-- ===== SCRIPTS ===== -->
+    <script src="javascript.js"></script>
+
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+
+    <script id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+</body>
+
+</html>
