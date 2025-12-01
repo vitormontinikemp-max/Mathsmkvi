@@ -318,12 +318,12 @@ hr {
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
-/* Botões de abrir/fechar lousa */
+/* ===== Botões Lousa ===== */
 #fecharLousa,
 #abrirLousa {
     position: fixed;
     bottom: 150px;
-    right: 42px;
+    right: 30px;
     padding: 8px 14px;
     border-radius: 20px;
     border: 1px solid black;
@@ -418,19 +418,20 @@ hr {
     background: #222;
 }
 
+/* ===== Botão Abrir Calculadora ===== */
 .open-calc {
     position: fixed;
     bottom: 200px;
-    right: 65px;
-    padding: 8px 12px;       /* menor */
-    border-radius: 8px;      /* menor */
+    right: 30px;
+    padding: 8px 12px;        /* botão menor */
+    border-radius: 8px;       /* cantos menores */
     border: 1px solid white;
     background: black;
     color: white;
-    font-size: 14px;         /* menor */
+    font-size: 14px;          /* texto menor */
     cursor: pointer;
     z-index: 1000;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.7); /* menor */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.7);
     transition: var(--transition);
 }
 
@@ -524,54 +525,7 @@ hr {
     font-weight: normal;
 }
 
-/* ===== MENU LATERAL ===== */
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 230px;
-    background: white;
-    border-right: 2px solid black;
-    box-shadow: 5px 0 25px rgba(0,0,0,0.6);
-    padding-top: 60px;
-    transform: translateX(-100%);
-    transition: var(--transition);
-    z-index: 2000;
-    border-radius: 0 20px 20px 0;
-}
 
-.sidebar.active {
-    transform: translateX(0);
-}
-
-.sidebar ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.sidebar ul li {
-    margin: 15px 0;
-}
-
-.sidebar ul li a {
-    display: block;
-    text-decoration: none;
-    color: black;
-    font-size: 18px;
-    font-weight: bold;
-    padding: 10px 25px;
-    border-radius: 10px;
-    transition: var(--transition);
-}
-
-.sidebar ul li a:hover {
-    background: #222;
-    color: white;
-    transform: translateX(5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
 
 .menu-toggle {
     position: fixed;
@@ -595,19 +549,7 @@ hr {
 }
 
 
-#imagemkvi {
-    text-align: center;
-    margin-top: 40px;
-}
 
-#imagemkvi img {
-    width: 120px;
-    height: 120px;
-    border-radius: 20%;
-    border: 1px solid black;
-    box-shadow: 0 3px 10px rgba(0,0,0,1);
-    transition: var(--transition);
-}
 
 #dl {
     text-align: center;
@@ -732,20 +674,7 @@ body.dark-mode #conteudoSelecionado {
     color: #d1d1d1;
 }
 
-body.dark-mode .sidebar {
-    background: #000;
-    border-right: 2px solid white;
-    box-shadow: 5px 0 25px rgba(255,255,255,0.3);
-}
 
-body.dark-mode .sidebar ul li a {
-    color: white;
-}
-
-body.dark-mode .sidebar ul li a:hover {
-    background: #fff;
-    color: black;
-}
 
 body.dark-mode .menu-toggle {
     background: #555;
@@ -835,3 +764,4 @@ body.dark-mode .unit-circle-container {
     }
 
 }
+
