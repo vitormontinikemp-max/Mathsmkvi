@@ -383,7 +383,7 @@ hr {
 @media (max-width: 800px) {
     #fecharLousa,
     #abrirLousa {
-        bottom: 120px;      /* ajustado para ficar acima da calculadora */
+        bottom: 90px;      /* ajustado para ficar acima da calculadora */
         right: 20px;       /* mais para dentro */
         padding: 8px 14px;
         font-size: 14px;
@@ -842,6 +842,7 @@ body.dark-mode .unit-circle-container {
     }
 
 }
+
 
 
 
