@@ -253,6 +253,7 @@ hr {
 }
 
 /* ===== LOUSA DIGITAL ===== */
+/* ===== LOUSA DIGITAL ===== */
 .lousa-container {
     gap: 20px;
     justify-content: center;
@@ -264,8 +265,10 @@ hr {
     transition: all 0.4s ease;
     display: flex;
     align-items: flex-start;
-    margin-left: 50px;
-    margin-top: 20px;
+    margin: 20px auto;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: 100%;
 }
 
 .lousa-container.visivel {
@@ -282,8 +285,12 @@ hr {
     background-size: contain;
     box-shadow: 0 5px 15px rgba(0,0,0,1);
     transition: var(--transition);
-    width: 1000px;  
-    height: 600px; 
+    width: 1000px;
+    height: 600px;
+
+    /* melhora responsividade */
+    max-width: 95vw;
+    max-height: 60vh;
 }
 
 #lousa:hover {
@@ -298,6 +305,7 @@ hr {
     gap: 10px;
 }
 
+/* Botão padrão */
 .tools button {
     width: 100px;
     padding: 10px 8px;
@@ -318,14 +326,45 @@ hr {
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
+/* ===== RESPONSIVIDADE MOBILE ===== */
+@media (max-width: 900px) {
+
+    .lousa-container {
+        flex-direction: column;
+        align-items: center;
+        margin-left: 0;
+    }
+
+    #lousa {
+        width: 95vw;
+        height: 60vh; /* se adapta ao celular */
+        max-height: 65vh;
+    }
+
+    .tools {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .tools button {
+        width: 90px;
+        font-size: 13px;
+        padding: 8px 6px;
+    }
+}
+
+
 /* ===== Botões Lousa ===== */
 #fecharLousa,
 #abrirLousa {
     position: fixed;
     bottom: 150px;
     right: 30px;
-    padding: 8px 14px;
-    border-radius: 20px;
+    padding: 10px 16px;
+    border-radius: 25px;
     border: 1px solid black;
     background: #000;
     color: white;
@@ -333,7 +372,22 @@ hr {
     margin: 3px;
     transition: var(--transition);
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 9999; /* sempre visível */
 }
+
+/* ===== MOBILE ===== */
+@media (max-width: 800px) {
+
+    #fecharLousa,
+    #abrirLousa {
+        bottom: 20px;      /* mais baixo para caber na tela */
+        right: 20px;       /* mais para dentro */
+        padding: 8px 14px;
+        font-size: 14px;
+        border-radius: 18px;
+    }
+}
+
 
 #fecharLousa:hover,
 #abrirLousa:hover {
@@ -421,19 +475,31 @@ hr {
 /* ===== Botão Abrir Calculadora ===== */
 .open-calc {
     position: fixed;
-    bottom: 200px;
-    right: 30px;
-    padding: 8px 12px;        /* botão menor */
-    border-radius: 8px;       /* cantos menores */
+    bottom: calc(200px + env(safe-area-inset-bottom));  /* respeita notch do celular */
+    right: calc(30px + env(safe-area-inset-right));      /* sem colar na borda */
+    padding: 8px 12px;
+    border-radius: 8px;
     border: 1px solid white;
     background: black;
     color: white;
-    font-size: 14px;          /* texto menor */
+    font-size: 14px;
     cursor: pointer;
     z-index: 1000;
     box-shadow: 0 5px 15px rgba(0,0,0,0.7);
     transition: var(--transition);
 }
+
+/* ===== Ajuste automático para telas pequenas ===== */
+@media(max-width: 600px) {
+    .open-calc {
+        bottom: calc(20px + env(safe-area-inset-bottom));
+        right: calc(20px + env(safe-area-inset-right));
+        padding: 10px 14px;
+        font-size: 16px;   /* toque mais fácil no celular */
+        border-radius: 12px;
+    }
+}
+
 
 
 .open-calc:hover {
@@ -764,4 +830,5 @@ body.dark-mode .unit-circle-container {
     }
 
 }
+
 
