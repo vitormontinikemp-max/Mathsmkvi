@@ -373,11 +373,13 @@ hr {
     transition: var(--transition);
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     z-index: 9999; /* sempre visível */
+    /* Garante que o botão siga a tela durante a rolagem */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
 }
 
 /* ===== MOBILE ===== */
 @media (max-width: 800px) {
-
     #fecharLousa,
     #abrirLousa {
         bottom: 20px;      /* mais baixo para caber na tela */
@@ -385,6 +387,9 @@ hr {
         padding: 8px 14px;
         font-size: 14px;
         border-radius: 18px;
+        /* Otimização para mobile */
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
     }
 }
 
@@ -487,6 +492,9 @@ hr {
     z-index: 1000;
     box-shadow: 0 5px 15px rgba(0,0,0,0.7);
     transition: var(--transition);
+    /* Garante que o botão siga a tela durante a rolagem */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
 }
 
 /* ===== Ajuste automático para telas pequenas ===== */
@@ -497,6 +505,9 @@ hr {
         padding: 10px 14px;
         font-size: 16px;   /* toque mais fácil no celular */
         border-radius: 12px;
+        /* Otimização para mobile */
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
     }
 }
 
@@ -830,5 +841,6 @@ body.dark-mode .unit-circle-container {
     }
 
 }
+
 
 
