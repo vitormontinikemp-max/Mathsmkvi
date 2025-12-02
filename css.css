@@ -1,6 +1,7 @@
-
-
-
+#contt {
+width: 100%;        /* garante toda a largura */
+text-align: center; /* centraliza horizontalmente */
+}
 
 /* ===== VARIÁVEIS E RESET ===== */
 :root {
@@ -841,6 +842,7 @@ body.dark-mode .unit-circle-container {
     }
 
 }
+
 
 
 
