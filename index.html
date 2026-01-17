@@ -1,482 +1,402 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="pt-BR">
 <head>
-    <!-- Metadados básicos -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Ícone do site -->
-    <link id="icone" rel="icon" type="image/jpeg" href="https://i.postimg.cc/PrypnSYM/mkvi-math.png">
-
-    <!-- Verificação do Google AdSense -->
-    <meta name="google-adsense-account" content="ca-pub-9543987935426990">
-
-    <!-- Título -->
-    <title>Mkvi Math Solver</title>
-
-    <!-- Script do Google AdSense -->
-    <script async 
-        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9543987935426990"
-        crossorigin="anonymous">
-    </script>
-
-    <!-- Estilos -->
-    <link rel="stylesheet" href="css.css">
+    <title>MKVI Math Solver</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
 </head>
-
-
 <body>
-    <div id="contt">
-       <button id="toggleTheme">💡</button>
-    </div>
-       
-    
-       <button id="openCalc" class="open-calc">🧮</button> 
-       <button class="abrir-lousa-container" id="abrirLousa">🖌️</button> 
-       <button id="fecharLousa">❌</button> 
-    
-    
-    
-    <!-- ===== MAIN CONTAINER ===== -->
     <div class="container">
-        <h1 id="ms">Math Solver</h1>
-        <h4>Choose the equation type:</h4>
+        <header>
+            <div class="logo">
+                <i class="fas fa-function"></i>
+                <h1>MKVI Math Solver</h1>
+            </div>
+            <div class="header-controls">
+                <button id="toggle-keyboard" class="btn-icon" title="Mostrar/ocultar teclado">
+                    <i class="fas fa-keyboard"></i>
+                </button>
+                
+            </div>
+        </header>
 
-        <select id="tipoEquacao" onchange="mostrarSeção()">
-            <option value="">Select</option>
-            <option value="linear">Linear equation</option>
-            <option value="quadratic">Quadratic equation</option>
-            <option value="cubic">Cubic equation</option>
-            <option value="quartic">Quartic equation</option>
-            <option value="exponential">Exponential equation</option>
-            <option value="logarithmic">Logarithmic equation</option>
-            <option value="trigonometric">Trigonometric equation</option>
-        </select>
-
-        <!-- ===== LINEAR EQUATION ===== -->
-        <div id="linear" class="secao" style="display:none;">
-            <h1>• Linear Equation Solver</h1>
-
-            <div class="coeficientes-container">
-                <div class="coeficiente-input">
-                    <label for="linearA">a:</label>
-                    <input type="text" id="linearA" placeholder="ex: 2, 3" step="any">
-                    <span class="variavel">x</span>
+        <div class="main-content">
+            <!-- Coluna da esquerda - Entrada de funções -->
+            <div class="functions-panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-edit"></i> Entrada de Funções</h2>
+                    <button id="clear-all" class="btn-small btn-danger">
+                        <i class="fas fa-trash"></i> Limpar Tudo
+                    </button>
                 </div>
-
-                <div class="coeficiente-input">
-                    <label for="linearB">b:</label>
-                    <input type="text" id="linearB" placeholder="ex: 1, -4" step="any">
+                
+                <div class="input-container">
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span class="function-label">f₁(x) =</span>
+                            <div class="function-input-wrapper">
+                                <input type="text" id="main-input" placeholder="Digite sua expressão aqui..." 
+                                       autocomplete="off" spellcheck="false">
+                                <div class="suggestions" id="suggestions"></div>
+                            </div>
+                        </div>
+                        <div class="input-actions">
+                            <button id="eval-btn" class="btn-primary">
+                                <i class="fas fa-check"></i> Plotar
+                            </button>
+                            <button id="solve-btn" class="btn-secondary">
+                                <i class="fas fa-calculator"></i> Resolver
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-examples">
+                        <p>Exemplos rápidos:</p>
+                        <div class="example-buttons">
+                            <button class="example-btn" data-expr="x^2">x²</button>
+                            <button class="example-btn" data-expr="sin(x)">sin(x)</button>
+                            <button class="example-btn" data-expr="exp(x)">eˣ</button>
+                            <button class="example-btn" data-expr="log(x, 10)">log(x)</button>
+                            <button class="example-btn" data-expr="x^3 - 3x">x³-3x</button>
+                            <button class="example-btn" data-expr="1/x">1/x</button>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="igualdade">=</div>
-
-                <div class="coeficiente-input">
-                    <label for="linearC">c:</label>
-                    <input type="text" id="linearC" placeholder="ex: 7, 8" step="any">
+                
+                <div class="functions-list-container">
+                    <h3><i class="fas fa-list"></i> Funções Plotadas</h3>
+                    <div id="functions-list">
+                        <!-- Funções serão adicionadas dinamicamente -->
+                    </div>
+                </div>
+                
+                <div class="solutions-container" id="solutions-panel">
+                    <h3><i class="fas fa-lightbulb"></i> Soluções</h3>
+                    <div id="solutions-list">
+                        <!-- Soluções serão exibidas aqui -->
+                    </div>
                 </div>
             </div>
-
-            <button onclick="resolverLinear()">Solve</button>
-
-            <div class="exemplos">
-                <p>Examples:</p>
-                <button onclick="usarExemploLinear(2, 3, 7)">\( 2x + 3 = 7 \)</button>
-                <button onclick="usarExemploLinear(3, -1, 8)">\( 3x - 1 = 8 \)</button>
-                <button onclick="usarExemploLinear(4, 2, 10)">\( 4x + 2 = 10 \)</button>
-                <button onclick="usarExemploLinear(1, 5, 0)">\( x + 5 = 0 \)</button>
+            
+            <!-- Coluna do meio - Gráfico -->
+            <div class="graph-panel">
+                <div class="graph-header">
+                    <h2><i class="fas fa-chart-line"></i> Gráfico</h2>
+                    <div class="graph-controls">
+                        <button id="zoom-in" class="btn-icon" title="Zoom In">
+                            <i class="fas fa-search-plus"></i>
+                        </button>
+                        <button id="zoom-out" class="btn-icon" title="Zoom Out">
+                            <i class="fas fa-search-minus"></i>
+                        </button>
+                        <button id="fit-view" class="btn-icon" title="Ajustar vista">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                        <button id="reset-view" class="btn-icon" title="Resetar vista">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="graph" class="graph-area"></div>
+                <div class="graph-info" id="graph-info">
+                    <div class="cursor-info">
+                        <span id="cursor-position">x: 0.00, y: 0.00</span>
+                    </div>
+                    <div class="zoom-info">
+                        <span id="zoom-level">Zoom: 1.00x</span>
+                    </div>
+                </div>
             </div>
-
-            <div id="passos"></div>
+            
+            <!-- Coluna da direita - Configurações -->
+            <div class="settings-panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-sliders-h"></i> Configurações</h2>
+                </div>
+                
+                <div class="settings-section">
+                    <h3><i class="fas fa-ruler-combined"></i> Eixos</h3>
+                    <div class="settings-grid">
+                        <div class="setting">
+                            <label for="x-min">X mínimo</label>
+                            <input type="number" id="x-min" value="-10" step="0.5">
+                        </div>
+                        <div class="setting">
+                            <label for="x-max">X máximo</label>
+                            <input type="number" id="x-max" value="10" step="0.5">
+                        </div>
+                        <div class="setting">
+                            <label for="y-min">Y mínimo</label>
+                            <input type="number" id="y-min" value="-10" step="0.5">
+                        </div>
+                        <div class="setting">
+                            <label for="y-max">Y máximo</label>
+                            <input type="number" id="y-max" value="10" step="0.5">
+                        </div>
+                        <div class="setting">
+                            <label for="step">Precisão</label>
+                            <input type="number" id="step" value="0.1" step="0.01" min="0.01">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3><i class="fas fa-paint-brush"></i> Aparência</h3>
+                    <div class="settings-grid">
+                        <div class="setting">
+                            <label for="grid-toggle">Grade</label>
+                            <label class="switch">
+                                <input type="checkbox" id="grid-toggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting">
+                            <label for="axes-toggle">Eixos</label>
+                            <label class="switch">
+                                <input type="checkbox" id="axes-toggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting">
+                            <label for="theme-select">Tema</label>
+                            <select id="theme-select">
+                                <option value="light">Claro</option>
+                                <option value="dark" selected>Escuro</option>
+                                <option value="blue">Azul</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3><i class="fas fa-crosshairs"></i> Intersecções</h3>
+                    <div class="settings-grid">
+                        <div class="setting">
+                            <label for="find-roots">Encontrar raízes</label>
+                            <label class="switch">
+                                <input type="checkbox" id="find-roots">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting">
+                            <label for="find-intersections">Intersecções</label>
+                            <label class="switch">
+                                <input type="checkbox" id="find-intersections">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <!-- ===== QUADRATIC EQUATION ===== -->
-        <div id="quadratic" class="secao" style="display:none;">
-            <h1>• Quadratic Equation Solver</h1>
-
-            <div class="coeficientes-container">
-                <div class="coeficiente-input">
-                    <label for="quadraticA">a:</label>
-                    <input type="text" id="quadraticA" placeholder="ex: 1, 2" step="any">
-                    <span class="variavel">x²</span>
+        
+        <!-- Teclado Virtual  -->
+        <div class="keyboard-panel" id="keyboard-panel">
+            <div class="keyboard-header">
+                <h3><i class="fas fa-keyboard"></i> Teclado Matemático</h3>
+                <button id="close-keyboard" class="btn-icon">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="keyboard-tabs">
+                <button class="keyboard-tab active" data-tab="basic">Básico</button>
+                <button class="keyboard-tab" data-tab="functions">Funções</button>
+                <button class="keyboard-tab" data-tab="trig">Trigonométricas</button>
+                <button class="keyboard-tab" data-tab="advanced">Avançado</button>
+                <button class="keyboard-tab" data-tab="stats">Estatística</button>
+            </div>
+            
+            <div class="keyboard-content">
+                <!-- Aba Básico -->
+                <div class="keyboard-tab-content active" id="tab-basic">
+                    <div class="keyboard-row">
+                        <button class="keyboard-key" data-insert="7">7</button>
+                        <button class="keyboard-key" data-insert="8">8</button>
+                        <button class="keyboard-key" data-insert="9">9</button>
+                        <button class="keyboard-key" data-insert=" + ">+</button>
+                        <button class="keyboard-key" data-insert=" - ">-</button>
+                        <button class="keyboard-key" data-insert="(">(</button>
+                        <button class="keyboard-key" data-insert=")">)</button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button class="keyboard-key" data-insert="4">4</button>
+                        <button class="keyboard-key" data-insert="5">5</button>
+                        <button class="keyboard-key" data-insert="6">6</button>
+                        <button class="keyboard-key" data-insert=" * ">×</button>
+                        <button class="keyboard-key" data-insert=" / ">÷</button>
+                        <button class="keyboard-key" data-insert="^">^</button>
+                        <button class="keyboard-key" data-insert="**">**</button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button class="keyboard-key" data-insert="1">1</button>
+                        <button class="keyboard-key" data-insert="2">2</button>
+                        <button class="keyboard-key" data-insert="3">3</button>
+                        <button class="keyboard-key" data-insert=".">.</button>
+                        <button class="keyboard-key" data-insert=",">,</button>
+                        <button class="keyboard-key" data-insert="=">=</button>
+                        <button class="keyboard-key" data-insert="!">!</button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button class="keyboard-key" data-insert="0">0</button>
+                        <button class="keyboard-key" data-insert="x">x</button>
+                        <button class="keyboard-key" data-insert="y">y</button>
+                        <button class="keyboard-key" data-insert="a">a</button>
+                        <button class="keyboard-key" data-insert="b">b</button>
+                        <button class="keyboard-key" data-insert="<"><</button>
+                        <button class="keyboard-key" data-insert=">">></button>
+                    </div>
                 </div>
-
-                <div class="coeficiente-input">
-                    <label for="quadraticB">b:</label>
-                    <input type="text" id="quadraticB" placeholder="ex: -3, 5" step="any">
-                    <span class="variavel">x</span>
+                
+                <!-- Aba Funções -->
+                <div class="keyboard-tab-content" id="tab-functions">
+                    <div class="keyboard-row">
+                        <button class="keyboard-key" data-insert="sqrt(">√</button>
+                        <button class="keyboard-key" data-insert="abs(">|x|</button>
+                        <button class="keyboard-key" data-insert="exp(">eˣ</button>
+                        <button class="keyboard-key" data-insert="log(">log</button>
+                        <button class="keyboard-key" data-insert="ln(">ln</button>
+                        <button class="keyboard-key" data-insert="factorial(">x!</button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button class="keyboard-key" data-insert="floor(">floor</button>
+                        <button class="keyboard-key" data-insert="ceil(">ceil</button>
+                        <button class="keyboard-key" data-insert="round(">round</button>
+                        <button class="keyboard-key" data-insert="sign(">sign</button>
+                        <button class="keyboard-key" data-insert="mod(">mod</button>
+                        <button class="keyboard-key" data-insert="gcd(">gcd</button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button class="keyboard-key" data-insert="min(">min</button>
+                        <button class="keyboard-key" data-insert="max(">max</button>
+                        <button class="keyboard-key" data-insert="sum(">∑</button>
+                        <button class="keyboard-key" data-insert="prod(">∏</button>
+                        <button class="keyboard-key" data-insert="mean(">mean</button>
+                        <button class="keyboard-key" data-insert="median(">median</button>
+                    </div>
                 </div>
-
-                <div class="coeficiente-input">
-                    <label for="quadraticC">c:</label>
-                    <input type="text" id="quadraticC" placeholder="ex: 2, -6" step="any">
+                
+                <!-- Aba Trigonométricas -->
+                <div class="keyboard-tab-content" id="tab-trig">
+                    <div class="keyboard-row">
+                        <button class="keyboard-key" data-insert="sin(">sin</button>
+                        <button class="keyboard-key" data-insert="cos(">cos</button>
+                        <button class="keyboard-key" data-insert="tan(">tan</button>
+                        <button class="keyboard-key" data-insert="cot(">cot</button>
+                        <button class="keyboard-key" data-insert="sec(">sec</button>
+                        <button class="keyboard-key" data-insert="csc(">csc</button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button class="keyboard-key" data-insert="asin(">sin⁻¹</button>
+                        <button class="keyboard-key" data-insert="acos(">cos⁻¹</button>
+                        <button class="keyboard-key" data-insert="atan(">tan⁻¹</button>
+                        <button class="keyboard-key" data-insert="acot(">cot⁻¹</button>
+                        <button class="keyboard-key" data-insert="asec(">sec⁻¹</button>
+                        <button class="keyboard-key" data-insert="acsc(">csc⁻¹</button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button class="keyboard-key" data-insert="sinh(">sinh</button>
+                        <button class="keyboard-key" data-insert="cosh(">cosh</button>
+                        <button class="keyboard-key" data-insert="tanh(">tanh</button>
+                        <button class="keyboard-key" data-insert="coth(">coth</button>
+                        <button class="keyboard-key" data-insert="sech(">sech</button>
+                        <button class="keyboard-key" data-insert="csch(">csch</button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button class="keyboard-key" data-insert="pi">π</button>
+                        <button class="keyboard-key" data-insert="e">e</button>
+                        <button class="keyboard-key" data-insert="deg">°</button>
+                        <button class="keyboard-key" data-insert="rad">rad</button>
+                        <button class="keyboard-key" data-insert="tau">τ</button>
+                        <button class="keyboard-key" data-insert="phi">φ</button>
+                    </div>
                 </div>
-
-                <div class="igualdade">=</div>
-
-                <div class="coeficiente-input">
-                    <label for="quadraticD">d:</label>
-                    <input type="text" id="quadraticD" placeholder="ex: 0" step="any" value="0">
+                
+                <!-- Aba Avançado -->
+                <div class="keyboard-tab-content" id="tab-advanced">
+                    <div class="keyboard-row">
+                        <button class="keyboard-key" data-insert="integrate(">∫</button>
+                        <button class="keyboard-key" data-insert="diff(">d/dx</button>
+                        <button class="keyboard-key" data-insert="limit(">lim</button>
+                        <button class="keyboard-key" data-insert="sigma(">Σ</button>
+                        <button class="keyboard-key" data-insert="product(">Π</button>
+                        <button class="keyboard-key" data-insert="infinity">∞</button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button class="keyboard-key" data-insert="<=">≤</button>
+                        <button class="keyboard-key" data-insert=">=">≥</button>
+                        <button class="keyboard-key" data-insert="!=">≠</button>
+                        <button class="keyboard-key" data-insert="approx">≈</button>
+                        <button class="keyboard-key" data-insert="implies">⇒</button>
+                        <button class="keyboard-key" data-insert="equiv">≡</button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button class="keyboard-key" data-insert="alpha">α</button>
+                        <button class="keyboard-key" data-insert="beta">β</button>
+                        <button class="keyboard-key" data-insert="gamma">γ</button>
+                        <button class="keyboard-key" data-insert="delta">δ</button>
+                        <button class="keyboard-key" data-insert="epsilon">ε</button>
+                        <button class="keyboard-key" data-insert="theta">θ</button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button class="keyboard-key" data-insert="matrix(">[[ ]]</button>
+                        <button class="keyboard-key" data-insert="det(">det</button>
+                        <button class="keyboard-key" data-insert="transpose(">Aᵀ</button>
+                        <button class="keyboard-key" data-insert="eigen(">eigen</button>
+                        <button class="keyboard-key" data-insert="solve(">solve</button>
+                        <button class="keyboard-key" data-insert="root(">root</button>
+                    </div>
+                </div>
+                
+                <!-- Aba Estatística -->
+                <div class="keyboard-tab-content" id="tab-stats">
+                    <div class="keyboard-row">
+                        <button class="keyboard-key" data-insert="std(">σ</button>
+                        <button class="keyboard-key" data-insert="var(">σ²</button>
+                        <button class="keyboard-key" data-insert="normal(">N(μ,σ)</button>
+                        <button class="keyboard-key" data-insert="binom(">Binom</button>
+                        <button class="keyboard-key" data-insert="poisson(">Poisson</button>
+                        <button class="keyboard-key" data-insert="chi2(">χ²</button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button class="keyboard-key" data-insert="corr(">ρ</button>
+                        <button class="keyboard-key" data-insert="cov(">cov</button>
+                        <button class="keyboard-key" data-insert="quantile(">Q</button>
+                        <button class="keyboard-key" data-insert="mode(">mode</button>
+                        <button class="keyboard-key" data-insert="variance(">var</button>
+                        <button class="keyboard-key" data-insert="moment(">moment</button>
+                    </div>
                 </div>
             </div>
-
-            <button onclick="resolverQuadratic()">Solve</button>
-
-            <div class="exemplos">
-                <p>Examples:</p>
-                <button onclick="usarExemploQuadratic(1, -3, 2, 0)">\( x^2 - 3x + 2 = 0 \)</button>
-                <button onclick="usarExemploQuadratic(1, -5, 6, 0)">\( x^2 - 5x + 6 = 0 \)</button>
-                <button onclick="usarExemploQuadratic(1, 2, -3, 0)">\( x^2 + 2x - 3 = 0 \)</button>
-                <button onclick="usarExemploQuadratic(1, -1, -6, 0)">\( x^2 - x - 6 = 0 \)</button>
+            
+            <div class="keyboard-footer">
+                <button class="keyboard-special-key" id="keyboard-backspace">
+                    <i class="fas fa-backspace"></i> Backspace
+                </button>
+                <button class="keyboard-special-key" id="keyboard-clear">
+                    <i class="fas fa-eraser"></i> Clean
+                </button>
+                <button class="keyboard-special-key" id="keyboard-space">
+                    <i class="fas fa-space-awesome"></i> Space
+                </button>
+                <button class="keyboard-special-key" id="keyboard-enter">
+                    <i class="fas fa-arrow-right"></i> Enter
+                </button>
             </div>
-
-            <div id="quadraticSteps"></div>
         </div>
-
-        <!-- ===== CUBIC EQUATION ===== -->
-        <div id="cubic" class="secao" style="display:none;">
-            <h1>• Cubic Equation Solver</h1>
-
-            <div class="coeficientes-container">
-                <div class="coeficiente-input">
-                    <label for="cubicA">a:</label>
-                    <input type="text" id="cubicA" placeholder="ex: 1, 2" step="any">
-                    <span class="variavel">x³</span>
-                </div>
-
-                <div class="coeficiente-input">
-                    <label for="cubicB">b:</label>
-                    <input type="text" id="cubicB" placeholder="ex: 0, -3" step="any">
-                    <span class="variavel">x²</span>
-                </div>
-
-                <div class="coeficiente-input">
-                    <label for="cubicC">c:</label>
-                    <input type="text" id="cubicC" placeholder="ex: -2, 6" step="any">
-                    <span class="variavel">x</span>
-                </div>
-
-                <div class="coeficiente-input">
-                    <label for="cubicD">d:</label>
-                    <input type="text" id="cubicD" placeholder="ex: 0, 2" step="any">
-                </div>
-
-                <div class="igualdade">=</div>
-
-                <div class="coeficiente-input">
-                    <label for="cubicE">e:</label>
-                    <input type="text" id="cubicE" placeholder="ex: 0" step="any" value="0">
-                </div>
-            </div>
-
-            <button onclick="resolverCubic()">Solve</button>
-
-            <div class="exemplos">
-                <p>Examples:</p>
-                <button onclick="usarExemploCubic(1, 0, -4, 0, 0)">\( x^3 - 4x = 0 \)</button>
-                <button onclick="usarExemploCubic(1, -6, 11, -6, 0)">\( x^3 - 6x^2 + 11x - 6 = 0 \)</button>
-                <button onclick="usarExemploCubic(1, -3, 0, 2, 0)">\( x^3 - 3x^2 + 2 = 0 \)</button>
-                <button onclick="usarExemploCubic(1, 0, -9, 0, 0)">\( x^3 - 9x = 0 \)</button>
-            </div>
-
-            <div id="cubicSteps"></div>
-        </div>
-
-        <!-- ===== QUARTIC EQUATION ===== -->
-        <div id="quartic" class="secao" style="display:none;">
-            <h1>• Quartic Equation Solver</h1>
-
-            <div class="coeficientes-container">
-                <div class="coeficiente-input">
-                    <label for="quarticA">a:</label>
-                    <input type="text" id="quarticA" placeholder="ex: 1, 2" step="any">
-                    <span class="variavel">x⁴</span>
-                </div>
-
-                <div class="coeficiente-input">
-                    <label for="quarticB">b:</label>
-                    <input type="text" id="quarticB" placeholder="ex: 0, 3" step="any">
-                    <span class="variavel">x³</span>
-                </div>
-
-                <div class="coeficiente-input">
-                    <label for="quarticC">c:</label>
-                    <input type="text" id="quarticC" placeholder="ex: -3, 5" step="any">
-                    <span class="variavel">x²</span>
-                </div>
-
-                <div class="coeficiente-input">
-                    <label for="quarticD">d:</label>
-                    <input type="text" id="quarticD" placeholder="ex: 0, 1" step="any">
-                    <span class="variavel">x</span>
-                </div>
-
-                <div class="coeficiente-input">
-                    <label for="quarticE">e:</label>
-                    <input type="text" id="quarticE" placeholder="ex: 1, 4" step="any">
-                </div>
-
-                <div class="igualdade">=</div>
-
-                <div class="coeficiente-input">
-                    <label for="quarticF">f:</label>
-                    <input type="text" id="quarticF" placeholder="ex: 0" step="any" value="0">
-                </div>
-            </div>
-
-            <button onclick="resolverQuartic()">Solve</button>
-
-            <div class="exemplos">
-                <p>Examples:</p>
-                <button onclick="usarExemploQuartic(1, 0, -5, 0, 4, 0)">\( x^4 - 5x^2 + 4 = 0 \)</button>
-                <button onclick="usarExemploQuartic(1, 0, -13, 0, 36, 0)">\( x^4 - 13x^2 + 36 = 0 \)</button>
-                <button onclick="usarExemploQuartic(1, 0, -10, 0, 9, 0)">\( x^4 - 10x^2 + 9 = 0 \)</button>
-                <button onclick="usarExemploQuartic(1, 0, -8, 0, 16, 0)">\( x^4 - 8x^2 + 16 = 0 \)</button>
-            </div>
-
-            <div id="quarticSteps"></div>
-        </div>
-
-        <!-- ===== EXPONENTIAL EQUATION ===== -->
-        <div id="exponential" class="secao" style="display:none;">
-            <h1>• Exponential Equation Solver</h1>
-
-            <div class="coeficientes-container">
-                <div class="coeficiente-input">
-                    <label for="expQ">Q:</label>
-                    <input type="text" id="expQ" placeholder="ex: 8, 16" step="any">
-                </div>
-
-                <div class="igualdade">=</div>
-
-                <div class="coeficiente-input">
-                    <label for="expQ0">Q₀:</label>
-                    <input type="text" id="expQ0" placeholder="ex: 2, 1" step="any">
-                </div>
-
-                <div class="coeficiente-input">
-                    <label for="expA">a:</label>
-                    <input type="text" id="expA" placeholder="ex: 2, 3" step="any">
-                </div>
-
-                <div class="coeficiente-input">
-                    <span class="variavel">^</span>
-                    <label for="expT">t:</label>
-                    <input type="text" id="expT" placeholder="ex: 3, 2" step="any">
-                </div>
-            </div>
-
-            <button onclick="resolverExponential()">Solve</button>
-
-            <div class="exemplos">
-                <p>Examples:</p>
-                <button onclick="usarExemploExponential(8, 2, 2, '')">\( 8 = 2 \times 2^t \)</button>
-                <button onclick="usarExemploExponential(16, 1, 2, '')">\( 16 = 1 \times 2^t \)</button>
-                <button onclick="usarExemploExponential(27, '', 3, 3)">\( 27 = Q₀ \times 3^3 \)</button>
-                <button onclick="usarExemploExponential('', 2, 2, 4)">\( Q = 2 \times 2^4 \)</button>
-            </div>
-
-            <div id="exponentialSteps"></div>
-        </div>
-
-        <!-- ===== LOGARITHMIC EQUATION ===== -->
-        <div id="logarithmic" class="secao" style="display:none;">
-            <h1>• Logarithmic Equation Solver</h1>
-
-            <div class="coeficientes-container">
-                <div class="coeficiente-input">
-                    <label for="logBase">log</label>
-                    <input type="text" id="logBase" placeholder="ex: 2, 3" step="any">
-                </div>
-
-                <div class="coeficiente-input">
-                    <label for="logArgument">(</label>
-                    <input type="text" id="logArgument" placeholder="ex: 8, 9" step="any">
-                    <label for="logArgument">)</label>
-                </div>
-
-                <div class="igualdade">=</div>
-
-                <div class="coeficiente-input">
-                    <label for="logResult">result:</label>
-                    <input type="text" id="logResult" placeholder="ex: 3, 2" step="any">
-                </div>
-            </div>
-
-            <button onclick="resolverLogarithmic()">Solve</button>
-
-            <div class="exemplos">
-                <p>Examples:</p>
-                <button onclick="usarExemploLogarithmic(2, 8, '')">\( \log_{2}(8) = x \)</button>
-                <button onclick="usarExemploLogarithmic(3, '', 2)">\( \log_{3}(x) = 2 \)</button>
-                <button onclick="usarExemploLogarithmic('', 100, 2)">\( \log_{b}(100) = 2 \)</button>
-                <button onclick="usarExemploLogarithmic(5, 25, '')">\( \log_{5}(25) = x \)</button>
-            </div>
-
-            <div id="logarithmicSteps"></div>
-        </div>
-
-        <!-- ===== TRIGONOMETRIC EQUATION ===== -->
-        <div id="trigonometric" class="secao" style="display:none;">
-            <h1>• Trigonometric Equation Solver</h1>
-
-            <div class="coeficientes-container">
-                <div class="coeficiente-input">
-                    <select id="trigFunction">
-                        <option value="sin">sin</option>
-                        <option value="cos">cos</option>
-                        <option value="tan">tan</option>
-                        <option value="sec">sec</option>
-                        <option value="csc">csc</option>
-                        <option value="cot">cot</option>
-                    </select>
-                </div>
-
-                <div class="coeficiente-input">
-                    <label for="trigAngle">(</label>
-                    <input type="text" id="trigAngle" placeholder="ex: 30, 45, 60" step="any">
-                    <label for="trigAngle">)</label>
-                </div>
-
-                <div class="igualdade">=</div>
-
-                <div class="coeficiente-input">
-                    <label for="trigValue">value:</label>
-                    <input type="text" id="trigValue" placeholder="ex: 0.5, 1" step="any">
-                </div>
-            </div>
-
-            <button onclick="resolverTrigonometric()">Solve</button>
-
-            <div class="exemplos">
-                <p>Examples:</p>
-                <button onclick="usarExemploTrigonometric('sin', 30, '')">\( \sin(30°) = x \)</button>
-                <button onclick="usarExemploTrigonometric('cos', '', '1/2')">\( \cos(\theta) = \frac{1}{2} \)</button>
-                <button onclick="usarExemploTrigonometric('tan', 45, '')">\( \tan(45°) = x \)</button>
-                <button onclick="usarExemploTrigonometric('sin', '', '√3/2')">\( \sin(\theta) = \frac{\sqrt{3}}{2} \)</button>
-            </div>
-
-            <div id="trigonometricSteps"></div>
-        </div>
+        
+        <footer>
+            <p>MKVI Math Solver | Suporta: Equações, Funções, Cálculo, Álgebra, Estatística</p>
+            <p class="shortcuts">
+                <kbd>Ctrl + Enter</kbd>: Plotar | <kbd>Ctrl + K</kbd>: Teclado | <kbd>Ctrl + D</kbd>: Limpar | <kbd>Esc</kbd>: Fechar
+            </p>
+        </footer>
     </div>
 
-    <!-- ===== DIGITAL BLACKBOARD ===== -->
-    <div class="lousa-container" id="lousaContainer" style="display: none;">
-        <canvas id="lousa" width="1000" height="400"></canvas>
-
-        <div class="tools">
-            <button id="pencil">Pencil ✏️</button>
-            <button id="eraser">Eraser 🧽</button>
-            <button id="clear">Clear All 🧼</button>
-        </div>
-    </div>
-
-    <!-- ===== CALCULATOR MODAL ===== -->
-    <div id="calcModal" class="calc-modal">
-        <div class="calc-container">
-            <div class="calc-display">
-                <input type="text" id="calcInput" readonly placeholder="0">
-            </div>
-
-            <div class="calc-buttons">
-                <!-- Numbers and basic operations -->
-                <button onclick="calcAppend('7')">\( 7 \)</button>
-                <button onclick="calcAppend('8')">\( 8 \)</button>
-                <button onclick="calcAppend('9')">\( 9 \)</button>
-                <button onclick="calcAppend('/')">\( \div \)</button>
-
-                <button onclick="calcAppend('4')">\( 4 \)</button>
-                <button onclick="calcAppend('5')">\( 5 \)</button>
-                <button onclick="calcAppend('6')">\( 6 \)</button>
-                <button onclick="calcAppend('*')">\( \times \)</button>
-
-                <button onclick="calcAppend('1')">\( 1 \)</button>
-                <button onclick="calcAppend('2')">\( 2 \)</button>
-                <button onclick="calcAppend('3')">\( 3 \)</button>
-                <button onclick="calcAppend('-')">\( - \)</button>
-
-                <button onclick="calcAppend('0')">\( 0 \)</button>
-                <button onclick="calcAppend('.')">\( . \)</button>
-                <button onclick="calcCalculate()">\( = \)</button>
-                <button onclick="calcAppend('+')">\( + \)</button>
-
-                <!-- Special functions -->
-                <button onclick="calcSqrt()">\( \sqrt{} \)</button>
-                <button onclick="calcAppend('**')"> ^ </button>
-                <button onclick="calcAppend('(')">\( ( \)</button>
-                <button onclick="calcAppend(')')">\( ) \)</button>
-                <button onclick="calcClear()" class="span-two">\( C \)</button>
-            </div>
-
-            <button id="closeCalc">\( \text{Close} \)</button>
-        </div>
-    </div>
-
-    <!-- ===== MATH CONTENT ===== -->
-    <div id="mathTipsContainer">
-        <h1>Math Content</h1>
-        <h4 id="h44">
-            "This section covers the essential mathematics topics that every high school student should know."
-        </h4>
-
-        <div class="mathTipsContent">
-            <label for="topicSelect"><strong>Choose a topic:</strong></label>
-
-            <select id="topicSelect" onchange="mostrarConteudo()">
-                <option value="">-- Select --</option>
-                <option value="1">Numbers and Algebraic Expressions</option>
-                <option value="2">Equations and Inequalities</option>
-                <option value="3">Functions and Graphs</option>
-                <option value="4">Progressions and Sequences</option>
-                <option value="5">Trigonometry</option>
-                <option value="6">Analytic Geometry</option>
-                <option value="7">Plane Geometry</option>
-                <option value="8">Spatial Geometry</option>
-                <option value="9">Matrices and Determinants</option>
-                <option value="10">Combinatorics and Probability</option>
-                <option value="11">Set Theory and Logic</option>
-            </select>
-
-            <div id="conteudoSelecionado"></div>
-
-            <h4>
-                "Note: There are more contents within this topic, but these are the most important to know."
-            </h4>
-        </div>
-    </div>
-    
-    <h3></h3>
-     
-    
-
-    
-    <!-- ===== SCRIPTS ===== -->
     <script src="javascript.js"></script>
-
-    <script>
-        window.MathJax = {
-            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
-            svg: { fontCache: 'global' }
-        };
-    </script>
-
-    <script id="MathJax-script" async
-        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 </body>
-
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
