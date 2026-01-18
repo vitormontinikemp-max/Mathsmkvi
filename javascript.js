@@ -55,7 +55,7 @@ function analisarExpressaoMatematica(expr) {
     }
 }
 
-// ===== FUNÇÃO PARA VALIDAR E CONVERTER INPUT (APENAS UMA VERSÃO) =====
+// ===== FUNÇÃO PARA VALIDAR E CONVERTER INPUT =====
 function obterValorMatematico(inputId) {
     const input = document.getElementById(inputId);
     if (!input) return NaN;
@@ -90,11 +90,23 @@ function obterValorMatematico(inputId) {
     return analisarExpressaoMatematica(valor);
 }
 
-// ===== FUNÇÕES DE EXEMPLO =====
+// ===== FUNÇÃO AUXILIAR PARA FORMATAR DESIGUALDADE =====
+function formatarDesigualdade(simbolo) {
+    switch(simbolo) {
+        case '>': return '&gt;';
+        case '<': return '&lt;';
+        case '>=': return '&ge;';
+        case '<=': return '&le;';
+        default: return '=';
+    }
+}
+
+// ===== FUNÇÕES DE EXEMPLO ATUALIZADAS =====
 function usarExemploLinear(a, b, c) {
     document.getElementById('linearA').value = a !== undefined ? a : '';
     document.getElementById('linearB').value = b !== undefined ? b : '';
     document.getElementById('linearC').value = c !== undefined ? c : '';
+    document.getElementById('linearInequality').value = '=';
 }
 
 function usarExemploQuadratic(a, b, c, d) {
@@ -102,6 +114,7 @@ function usarExemploQuadratic(a, b, c, d) {
     document.getElementById('quadraticB').value = b !== undefined ? b : '';
     document.getElementById('quadraticC').value = c !== undefined ? c : '';
     document.getElementById('quadraticD').value = d !== undefined ? d : '';
+    document.getElementById('quadraticInequality').value = '=';
 }
 
 function usarExemploCubic(a, b, c, d, e) {
@@ -126,18 +139,21 @@ function usarExemploExponential(Q, Q0, a, t) {
     document.getElementById('expQ0').value = Q0 !== undefined ? Q0 : '';
     document.getElementById('expA').value = a !== undefined ? a : '';
     document.getElementById('expT').value = t !== undefined ? t : '';
+    document.getElementById('expInequality').value = '=';
 }
 
 function usarExemploLogarithmic(base, argument, result) {
     document.getElementById('logBase').value = base !== undefined ? base : '';
     document.getElementById('logArgument').value = argument !== undefined ? argument : '';
     document.getElementById('logResult').value = result !== undefined ? result : '';
+    document.getElementById('logInequality').value = '=';
 }
 
 function usarExemploTrigonometric(func, angle, value) {
     if (func) document.getElementById('trigFunction').value = func;
     document.getElementById('trigAngle').value = angle !== undefined ? angle : '';
     document.getElementById('trigValue').value = value !== undefined ? value : '';
+    document.getElementById('trigInequality').value = '=';
 }
 
 // ===== SISTEMA DE NÚMEROS COMPLEXOS =====
@@ -275,8 +291,45 @@ function formatarComplexo(real, imag) {
     return `${realStr} ${sinal} ${imagStr}i`;
 }
 
-// ===== EQUAÇÃO LINEAR =====
-function formatarEquacaoLinear(a, b, c) {
+// ===== FUNÇÃO AUXILIAR PARA RESOLVER INEQUALIDADES LINEARES =====
+function resolverInequacaoLinear(a, b, c, simbolo) {
+    let solucao = '';
+    const x = (c - b) / a;
+    
+    if (Math.abs(a) < 1e-10) {
+        // Coeficiente angular zero
+        const constante = c - b;
+        if (simbolo === '=') return constante === 0 ? '∀ x ∈ ℝ' : 'Sem solução';
+        if (simbolo === '>') return constante > 0 ? '∀ x ∈ ℝ' : 'Sem solução';
+        if (simbolo === '<') return constante < 0 ? '∀ x ∈ ℝ' : 'Sem solução';
+        if (simbolo === '>=') return constante >= 0 ? '∀ x ∈ ℝ' : 'Sem solução';
+        if (simbolo === '<=') return constante <= 0 ? '∀ x ∈ ℝ' : 'Sem solução';
+    }
+    
+    if (a > 0) {
+        switch(simbolo) {
+            case '=': solucao = `x = ${formatarNumeroInteiro(x)}`; break;
+            case '>': solucao = `x > ${formatarNumeroInteiro(x)}`; break;
+            case '<': solucao = `x < ${formatarNumeroInteiro(x)}`; break;
+            case '>=': solucao = `x ≥ ${formatarNumeroInteiro(x)}`; break;
+            case '<=': solucao = `x ≤ ${formatarNumeroInteiro(x)}`; break;
+        }
+    } else {
+        // a < 0 - inverte o sinal da desigualdade
+        switch(simbolo) {
+            case '=': solucao = `x = ${formatarNumeroInteiro(x)}`; break;
+            case '>': solucao = `x < ${formatarNumeroInteiro(x)}`; break;
+            case '<': solucao = `x > ${formatarNumeroInteiro(x)}`; break;
+            case '>=': solucao = `x ≤ ${formatarNumeroInteiro(x)}`; break;
+            case '<=': solucao = `x ≥ ${formatarNumeroInteiro(x)}`; break;
+        }
+    }
+    
+    return solucao;
+}
+
+// ===== EQUAÇÃO LINEAR COM DESIGUALDADES =====
+function formatarEquacaoLinear(a, b, c, simbolo) {
     let esquerda = '';
     if (a !== 0) {
         if (a === 1) esquerda += 'x';
@@ -285,18 +338,19 @@ function formatarEquacaoLinear(a, b, c) {
     }
     if (b > 0) esquerda += ` + ${formatarNumeroInteiro(b)}`;
     else if (b < 0) esquerda += ` - ${formatarNumeroInteiro(-b)}`;
-    return `$$${esquerda || '0'} = ${formatarNumeroInteiro(c)}$$`;
+    return `$$${esquerda || '0'} ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(c)}$$`;
 }
 
 function resolverLinear() {
     const a = obterValorMatematico('linearA');
     const b = obterValorMatematico('linearB');
     const c = obterValorMatematico('linearC');
+    const simbolo = document.getElementById('linearInequality').value;
     const divPassos = document.getElementById('passos');
     divPassos.innerHTML = '';
     
     if (isNaN(a) || isNaN(b) || isNaN(c)) {
-        divPassos.innerHTML = `<p style="color:red;">❌ Invalid mathematical expression. Please use numbers, fractions (a/b) or square roots (√n).</p>`;
+        divPassos.innerHTML = `<p style="color:red;">❌ Invalid mathematical expression.</p>`;
         renderMathJax();
         return;
     }
@@ -305,57 +359,83 @@ function resolverLinear() {
         divPassos.innerHTML = `<p style="color:orange;">⚠️ Please enter the coefficients</p>`;
         renderMathJax();
         return;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 
     try {
-        divPassos.innerHTML += `<div class="step"><p><strong>Step 1: Equation</strong></p>`;
-        divPassos.innerHTML += `<p>${formatarEquacaoLinear(a, b, c)}</p></div>`;
+        divPassos.innerHTML += `<div class="step"><p><strong>Step 1: Inequality</strong></p>`;
+        divPassos.innerHTML += `<p>${formatarEquacaoLinear(a, b, c, simbolo)}</p></div>`;
 
         if (a === 0) {
-            if (Math.abs(b - c) < 1e-10) {
-                divPassos.innerHTML += `<div class="step"><p><strong>Step 2: Analysis</strong></p>`;
-                divPassos.innerHTML += `<p>♾️ Infinite solutions (identity equation)</p></div>`;
+            divPassos.innerHTML += `<div class="step"><p><strong>Step 2: Analysis</strong></p>`;
+            const constante = c - b;
+            
+            if (simbolo === '=') {
+                divPassos.innerHTML += `<p>$$0 ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(constante)}$$</p>`;
+                if (constante === 0) {
+                    divPassos.innerHTML += `<p>✅ True for all x ∈ ℝ</p>`;
+                } else {
+                    divPassos.innerHTML += `<p>❌ No solution</p>`;
+                }
             } else {
-                divPassos.innerHTML += `<div class="step"><p><strong>Step 2: Analysis</strong></p>`;
-                divPassos.innerHTML += `<p>❌ No solution (${formatarNumeroInteiro(b)} ≠ ${formatarNumeroInteiro(c)})</p></div>`;
+                divPassos.innerHTML += `<p>$$${formatarNumeroInteiro(constante)} ${formatarDesigualdade(simbolo)} 0$$</p>`;
+                const resultado = eval(`${constante} ${simbolo} 0`);
+                if (resultado) {
+                    divPassos.innerHTML += `<p>✅ True for all x ∈ ℝ</p>`;
+                } else {
+                    divPassos.innerHTML += `<p>❌ No solution</p>`;
+                }
             }
             renderMathJax();
             return;
         }
 
-        const numerador = c - b;
-        const denominador = a;
-
-        divPassos.innerHTML += `<div class="step"><p><strong>Step 2: Rearrange</strong></p>`;
-        divPassos.innerHTML += `<p>$$${formatarNumeroInteiro(a)}x = ${formatarNumeroInteiro(numerador)}$$</p></div>`;
-
+        divPassos.innerHTML += `<div class="step"><p><strong>Step 2: Isolate x</strong></p>`;
+        divPassos.innerHTML += `<p>$$${formatarNumeroInteiro(a)}x ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(c - b)}$$</p>`;
 
         divPassos.innerHTML += `<div class="step"><p><strong>Step 3: Solve for x</strong></p>`;
-        const solucao = numerador / denominador;
-
-        if (denominador === 1) {
-            divPassos.innerHTML += `<p>$$x = ${formatarNumeroInteiro(solucao)}$$</p></div>`;
+        
+        const x = (c - b) / a;
+        if (a === 1 || a === -1) {
+            if (a === 1) {
+                divPassos.innerHTML += `<p>$$x ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(c - b)}$$</p>`;
+            } else {
+                // Multiplicar por -1 inverte desigualdade
+                let novoSímbolo = simbolo;
+                if (simbolo === '>') novoSímbolo = '<';
+                if (simbolo === '<') novoSímbolo = '>';
+                if (simbolo === '>=') novoSímbolo = '<=';
+                if (simbolo === '<=') novoSímbolo = '>=';
+                divPassos.innerHTML += `<p>$$x ${formatarDesigualdade(novoSímbolo)} ${formatarNumeroInteiro(b - c)}$$</p>`;
+            }
         } else {
-            divPassos.innerHTML += `<p>$$x = \\frac{${formatarNumeroInteiro(numerador)}}{${formatarNumeroInteiro(denominador)}} = ${formatarNumeroInteiro(solucao)}$$</p></div>`;
+            divPassos.innerHTML += `<p>$$x ${formatarDesigualdade(simbolo)} \\frac{${formatarNumeroInteiro(c - b)}}{${formatarNumeroInteiro(a)}}$$</p>`;
+            divPassos.innerHTML += `<p>$$x ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(x)}$$</p>`;
         }
 
-
+        divPassos.innerHTML += `<div class="step"><p><strong>Step 4: Solution Set</strong></p>`;
+        const solucao = resolverInequacaoLinear(a, b, c, simbolo);
+        divPassos.innerHTML += `<p><strong>$$${solucao}$$</strong></p>`;
+        
+        // Mostrar em notação de intervalo
+        if (simbolo !== '=') {
+            divPassos.innerHTML += `<p><strong>Interval notation:</strong> `;
+            if (a > 0) {
+                switch(simbolo) {
+                    case '>': divPassos.innerHTML += `$$(${formatarNumeroInteiro(x)}, \\infty)$$`; break;
+                    case '<': divPassos.innerHTML += `$$(-\\infty, ${formatarNumeroInteiro(x)})$$`; break;
+                    case '>=': divPassos.innerHTML += `$$[${formatarNumeroInteiro(x)}, \\infty)$$`; break;
+                    case '<=': divPassos.innerHTML += `$$(-\\infty, ${formatarNumeroInteiro(x)}]$$`; break;
+                }
+            } else {
+                switch(simbolo) {
+                    case '>': divPassos.innerHTML += `$$(-\\infty, ${formatarNumeroInteiro(x)})$$`; break;
+                    case '<': divPassos.innerHTML += `$$(${formatarNumeroInteiro(x)}, \\infty)$$`; break;
+                    case '>=': divPassos.innerHTML += `$$(-\\infty, ${formatarNumeroInteiro(x)}]$$`; break;
+                    case '<=': divPassos.innerHTML += `$$[${formatarNumeroInteiro(x)}, \\infty)$$`; break;
+                }
+            }
+            divPassos.innerHTML += `</p>`;
+        }
 
     } catch (err) {
         divPassos.innerHTML = `<p style="color:red;">Error: ${err}</p>`;
@@ -364,8 +444,120 @@ function resolverLinear() {
     renderMathJax();
 }
 
-// ===== EQUAÇÃO QUADRÁTICA =====
-function formatarEquacaoQuadratica(a, b, c, d) {
+// ===== FUNÇÃO AUXILIAR PARA RESOLVER INEQUALIDADES QUADRÁTICAS =====
+function resolverInequacaoQuadratica(a, b, c, d, simbolo) {
+    // Primeiro encontrar as raízes da equação
+    const constante = c - d;
+    const delta = b * b - 4 * a * constante;
+    
+    if (delta < 0) {
+        // Sem raízes reais
+        if (a > 0) {
+            // Parábola sempre positiva
+            switch(simbolo) {
+                case '>':
+                case '>=': return '∀ x ∈ ℝ';
+                case '=':
+                case '<':
+                case '<=': return 'No solution';
+            }
+        } else {
+            // Parábola sempre negativa
+            switch(simbolo) {
+                case '<':
+                case '<=': return '∀ x ∈ ℝ';
+                case '=':
+                case '>':
+                case '>=': return 'No solution';
+            }
+        }
+    }
+    
+    const sqrtDelta = Math.sqrt(delta);
+    const x1 = (-b + sqrtDelta) / (2 * a);
+    const x2 = (-b - sqrtDelta) / (2 * a);
+    
+    // Ordenar as raízes
+    const raizMenor = Math.min(x1, x2);
+    const raizMaior = Math.max(x1, x2);
+    
+    let solucao = '';
+    
+    if (a > 0) {
+        // Parábola com concavidade para cima
+        switch(simbolo) {
+            case '=': 
+                if (Math.abs(raizMenor - raizMaior) < 1e-10) {
+                    return `x = ${formatarNumeroInteiro(raizMenor)}`;
+                } else {
+                    return `x = ${formatarNumeroInteiro(raizMenor)} or x = ${formatarNumeroInteiro(raizMaior)}`;
+                }
+            case '>':
+                if (Math.abs(raizMenor - raizMaior) < 1e-10) {
+                    return `x ≠ ${formatarNumeroInteiro(raizMenor)}`;
+                } else {
+                    return `x < ${formatarNumeroInteiro(raizMenor)} or x > ${formatarNumeroInteiro(raizMaior)}`;
+                }
+            case '<':
+                if (Math.abs(raizMenor - raizMaior) < 1e-10) {
+                    return 'No solution';
+                } else {
+                    return `${formatarNumeroInteiro(raizMenor)} < x < ${formatarNumeroInteiro(raizMaior)}`;
+                }
+            case '>=':
+                if (Math.abs(raizMenor - raizMaior) < 1e-10) {
+                    return `∀ x ∈ ℝ`;
+                } else {
+                    return `x ≤ ${formatarNumeroInteiro(raizMenor)} or x ≥ ${formatarNumeroInteiro(raizMaior)}`;
+                }
+            case '<=':
+                if (Math.abs(raizMenor - raizMaior) < 1e-10) {
+                    return `x = ${formatarNumeroInteiro(raizMenor)}`;
+                } else {
+                    return `${formatarNumeroInteiro(raizMenor)} ≤ x ≤ ${formatarNumeroInteiro(raizMaior)}`;
+                }
+        }
+    } else {
+        // Parábola com concavidade para baixo
+        switch(simbolo) {
+            case '=': 
+                if (Math.abs(raizMenor - raizMaior) < 1e-10) {
+                    return `x = ${formatarNumeroInteiro(raizMenor)}`;
+                } else {
+                    return `x = ${formatarNumeroInteiro(raizMenor)} or x = ${formatarNumeroInteiro(raizMaior)}`;
+                }
+            case '>':
+                if (Math.abs(raizMenor - raizMaior) < 1e-10) {
+                    return 'No solution';
+                } else {
+                    return `${formatarNumeroInteiro(raizMenor)} < x < ${formatarNumeroInteiro(raizMaior)}`;
+                }
+            case '<':
+                if (Math.abs(raizMenor - raizMaior) < 1e-10) {
+                    return `x ≠ ${formatarNumeroInteiro(raizMenor)}`;
+                } else {
+                    return `x < ${formatarNumeroInteiro(raizMenor)} or x > ${formatarNumeroInteiro(raizMaior)}`;
+                }
+            case '>=':
+                if (Math.abs(raizMenor - raizMaior) < 1e-10) {
+                    return `x = ${formatarNumeroInteiro(raizMenor)}`;
+                } else {
+                    return `${formatarNumeroInteiro(raizMenor)} ≤ x ≤ ${formatarNumeroInteiro(raizMaior)}`;
+                }
+            case '<=':
+                if (Math.abs(raizMenor - raizMaior) < 1e-10) {
+                    return `∀ x ∈ ℝ`;
+                } else {
+                    return `x ≤ ${formatarNumeroInteiro(raizMenor)} or x ≥ ${formatarNumeroInteiro(raizMaior)}`;
+                }
+        }
+    }
+    
+    return solucao;
+}
+
+// ===== EQUAÇÃO QUADRÁTICA COM DESIGUALDADES =====
+function formatarEquacaoQuadratica(a, b, c, d, simbolo) {
     let esquerda = '';
     if (a !== 0) {
         if (a === 1) esquerda += 'x^2';
@@ -376,7 +568,7 @@ function formatarEquacaoQuadratica(a, b, c, d) {
     else if (b < 0) esquerda += ` - ${formatarNumeroInteiro(-b)}x`;
     if (c > 0) esquerda += ` + ${formatarNumeroInteiro(c)}`;
     else if (c < 0) esquerda += ` - ${formatarNumeroInteiro(-c)}`;
-    return `$$${esquerda || '0'} = ${formatarNumeroInteiro(d)}$$`;
+    return `$$${esquerda || '0'} ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(d)}$$`;
 }
 
 function resolverQuadratic() {
@@ -384,11 +576,12 @@ function resolverQuadratic() {
     const b = obterValorMatematico('quadraticB');
     const c = obterValorMatematico('quadraticC');
     const d = obterValorMatematico('quadraticD');
+    const simbolo = document.getElementById('quadraticInequality').value;
     const divPassos = document.getElementById('quadraticSteps');
     divPassos.innerHTML = '';
     
     if (isNaN(a) || isNaN(b) || isNaN(c) || isNaN(d)) {
-        divPassos.innerHTML = `<p style="color:red;">❌ Invalid mathematical expression. Please use numbers, fractions (a/b) or square roots (√n).</p>`;
+        divPassos.innerHTML = `<p style="color:red;">❌ Invalid mathematical expression.</p>`;
         renderMathJax();
         return;
     }
@@ -401,160 +594,142 @@ function resolverQuadratic() {
     
     try {
         const constante = c - d;
-        divPassos.innerHTML += `<div class="step"><p><strong>Step 1: Equation</strong></p>`;
-        divPassos.innerHTML += `<p>${formatarEquacaoQuadratica(a, b, c, d)}</p></div>`;
+        divPassos.innerHTML += `<div class="step"><p><strong>Step 1: Inequality</strong></p>`;
+        divPassos.innerHTML += `<p>${formatarEquacaoQuadratica(a, b, c, d, simbolo)}</p></div>`;
 
         divPassos.innerHTML += `<div class="step"><p><strong>Step 2: Standard Form</strong></p>`;
-        divPassos.innerHTML += `<p>$$${formatarNumeroInteiro(a)}x^2 + ${formatarNumeroInteiro(b)}x + ${formatarNumeroInteiro(constante)} = 0$$</p></div>`;
-
-
-
-
-
-
-
-
-
-
-
-
+        divPassos.innerHTML += `<p>$$${formatarNumeroInteiro(a)}x^2 + ${formatarNumeroInteiro(b)}x + ${formatarNumeroInteiro(constante)} ${formatarDesigualdade(simbolo)} 0$$</p></div>`;
 
         if (a === 0) {
             // Equação linear
-            divPassos.innerHTML += `<div class="step"><p><strong>Step 3: Analysis</strong></p>`;
-            divPassos.innerHTML += `<p>This is a linear equation (a = 0)</p></div>`;
+            divPassos.innerHTML += `<div class="step"><p><strong>Step 3: Linear Case (a = 0)</strong></p>`;
             
             if (b === 0) {
-                if (constante === 0) {
-                    divPassos.innerHTML += `<p>♾️ Infinite solutions</p>`;
+                // Constante apenas
+                divPassos.innerHTML += `<p>$$${formatarNumeroInteiro(constante)} ${formatarDesigualdade(simbolo)} 0$$</p>`;
+                const resultado = eval(`${constante} ${simbolo} 0`);
+                if (resultado) {
+                    divPassos.innerHTML += `<p>✅ True for all x ∈ ℝ</p>`;
                 } else {
                     divPassos.innerHTML += `<p>❌ No solution</p>`;
                 }
             } else {
-                const x = -constante / b;
-                divPassos.innerHTML += `<p>🔹 Solution: $$x = ${formatarNumeroInteiro(x)}$$</p>`;
+                // Equação linear
+                const solucao = resolverInequacaoLinear(b, 0, -constante, simbolo);
+                divPassos.innerHTML += `<p><strong>Solution:</strong> $${solucao}$</p>`;
             }
             renderMathJax();
             return;
         }
         
+        // Calcular discriminante
         const delta = b * b - 4 * a * constante;
         divPassos.innerHTML += `<div class="step"><p><strong>Step 3: Calculate Discriminant</strong></p>`;
         divPassos.innerHTML += `<p>$$\\Delta = b^2 - 4ac = (${formatarNumeroInteiro(b)})^2 - 4(${formatarNumeroInteiro(a)})(${formatarNumeroInteiro(constante)}) = ${formatarNumeroInteiro(delta)}$$</p></div>`;
         
-        divPassos.innerHTML += `<div class="step"><p><strong>Step 4: Apply Quadratic Formula</strong></p>`;
-        divPassos.innerHTML += `<p>$$x = \\frac{-b \\pm \\sqrt{\\Delta}}{2a}$$</p>`;
-        divPassos.innerHTML += `<p>$$x = \\frac{-${formatarNumeroInteiro(b)} \\pm \\sqrt{${formatarNumeroInteiro(delta)}}}{2(${formatarNumeroInteiro(a)})}$$</p></div>`;
-        
         if (delta < 0) {
-            // Raízes complexas
-            const parteReal = -b / (2 * a);
-            const parteImag = Math.sqrt(-delta) / (2 * a);
-
-            divPassos.innerHTML += `<div class="step"><p><strong>Step 5: Complex Roots</strong></p>`;
-            divPassos.innerHTML += `<p>Since $\\Delta < 0$, the equation has complex roots:</p>`;
-            divPassos.innerHTML += `<p>$$x_1 = ${formatarComplexo(parteReal, parteImag)}$$</p>`;
-            divPassos.innerHTML += `<p>$$x_2 = ${formatarComplexo(parteReal, -parteImag)}$$</p></div>`;
-        } else if (Math.abs(delta) < 1e-12) {
-            // Raiz dupla
-            const x = -b / (2 * a);
-            divPassos.innerHTML += `<div class="step"><p><strong>Step 5: Double Root</strong></p>`;
-            divPassos.innerHTML += `<p>Since $\\Delta = 0$, the equation has a double root:</p>`;
-            divPassos.innerHTML += `<p>$$x = ${formatarNumeroInteiro(x)}$$</p>`;
+            divPassos.innerHTML += `<div class="step"><p><strong>Step 4: No Real Roots</strong></p>`;
+            divPassos.innerHTML += `<p>Since $\\Delta < 0$, the quadratic has no real roots.</p>`;
             
-            // Mostrar forma fatorada
-            divPassos.innerHTML += `<p><strong>Factored Form:</strong></p>`;
-            const absX = Math.abs(x);
-            const sinal = x < 0 ? '+' : '-';
-            divPassos.innerHTML += `<p>$$${formatarNumeroInteiro(a)}(x ${sinal} ${formatarNumeroInteiro(absX)})^2 = 0$$</p></div>`;
+            if (a > 0) {
+                divPassos.innerHTML += `<p>The parabola opens upward and is always positive.</p>`;
+            } else {
+                divPassos.innerHTML += `<p>The parabola opens downward and is always negative.</p>`;
+            }
         } else {
-            // Duas raízes reais
+            // Encontrar raízes
             const sqrtDelta = Math.sqrt(delta);
             const x1 = (-b + sqrtDelta) / (2 * a);
             const x2 = (-b - sqrtDelta) / (2 * a);
-
-            divPassos.innerHTML += `<div class="step"><p><strong>Step 5: Real Roots</strong></p>`;
-            divPassos.innerHTML += `<p>Since $\\Delta > 0$, the equation has two real roots:</p>`;
-            divPassos.innerHTML += `<p>$$x_1 = \\frac{${formatarNumeroInteiro(-b)} + \\sqrt{${formatarNumeroInteiro(delta)}}}{${formatarNumeroInteiro(2*a)}} = ${formatarNumeroInteiro(x1)}$$</p>`;
-            divPassos.innerHTML += `<p>$$x_2 = \\frac{${formatarNumeroInteiro(-b)} - \\sqrt{${formatarNumeroInteiro(delta)}}}{${formatarNumeroInteiro(2*a)}} = ${formatarNumeroInteiro(x2)}$$</p></div>`;
-
-
-            // Mostrar forma fatorada quando possível
-            if (Math.abs(x1 - Math.round(x1)) < 1e-10 && Math.abs(x2 - Math.round(x2)) < 1e-10) {
-                divPassos.innerHTML += `<p><strong>Factored Form:</strong></p>`;
-                const absX1 = Math.abs(x1);
-                const sinal1 = x1 < 0 ? '+' : '-';
-                const absX2 = Math.abs(x2);
-                const sinal2 = x2 < 0 ? '+' : '-';
-                divPassos.innerHTML += `<p>$$${formatarNumeroInteiro(a)}(x ${sinal1} ${formatarNumeroInteiro(absX1)})(x ${sinal2} ${formatarNumeroInteiro(absX2)}) = 0$$</p>`;
+            
+            divPassos.innerHTML += `<div class="step"><p><strong>Step 4: Find Roots</strong></p>`;
+            if (Math.abs(delta) < 1e-12) {
+                // Raiz dupla
+                const x = -b / (2 * a);
+                divPassos.innerHTML += `<p>Double root: $$x = ${formatarNumeroInteiro(x)}$$</p>`;
+            } else {
+                divPassos.innerHTML += `<p>Roots: $$x_1 = ${formatarNumeroInteiro(x1)}, \\quad x_2 = ${formatarNumeroInteiro(x2)}$$</p>`;
             }
+            
+            // Análise do sinal
+            divPassos.innerHTML += `<div class="step"><p><strong>Step 5: Sign Analysis</strong></p>`;
+            
+            const raizMenor = Math.min(x1, x2);
+            const raizMaior = Math.max(x1, x2);
+            
+            if (a > 0) {
+                divPassos.innerHTML += `<p>Since $a > 0$, parabola opens upward:</p>`;
+                divPassos.innerHTML += `<p>• Positive for: $x < ${formatarNumeroInteiro(raizMenor)}$ or $x > ${formatarNumeroInteiro(raizMaior)}$</p>`;
+                divPassos.innerHTML += `<p>• Negative for: $${formatarNumeroInteiro(raizMenor)} < x < ${formatarNumeroInteiro(raizMaior)}$</p>`;
+                if (Math.abs(raizMenor - raizMaior) > 1e-10) {
+                    divPassos.innerHTML += `<p>• Zero at: $x = ${formatarNumeroInteiro(raizMenor)}$ and $x = ${formatarNumeroInteiro(raizMaior)}$</p>`;
+                } else {
+                    divPassos.innerHTML += `<p>• Zero at: $x = ${formatarNumeroInteiro(raizMenor)}$ (double root)</p>`;
+                }
+            } else {
+                divPassos.innerHTML += `<p>Since $a < 0$, parabola opens downward:</p>`;
+                divPassos.innerHTML += `<p>• Positive for: $${formatarNumeroInteiro(raizMenor)} < x < ${formatarNumeroInteiro(raizMaior)}$</p>`;
+                divPassos.innerHTML += `<p>• Negative for: $x < ${formatarNumeroInteiro(raizMenor)}$ or $x > ${formatarNumeroInteiro(raizMaior)}$</p>`;
+                if (Math.abs(raizMenor - raizMaior) > 1e-10) {
+                    divPassos.innerHTML += `<p>• Zero at: $x = ${formatarNumeroInteiro(raizMenor)}$ and $x = ${formatarNumeroInteiro(raizMaior)}$</p>`;
+                } else {
+                    divPassos.innerHTML += `<p>• Zero at: $x = ${formatarNumeroInteiro(raizMenor)}$ (double root)</p>`;
+                }
+            }
+        }
+        
+        divPassos.innerHTML += `<div class="step"><p><strong>Step 6: Solution</strong></p>`;
+        const solucao = resolverInequacaoQuadratica(a, b, c, d, simbolo);
+        divPassos.innerHTML += `<p><strong>$$${solucao}$$</strong></p>`;
+        
+        // Mostrar em notação de intervalo
+        if (solucao.includes('or')) {
+            const partes = solucao.split(' or ');
+            divPassos.innerHTML += `<p><strong>Interval notation:</strong> `;
+            if (partes[0].includes('< x <')) {
+                // Intervalo interno
+                const nums = partes[0].match(/[-\d\.]+/g);
+                divPassos.innerHTML += `$$(${nums[0]}, ${nums[1]})$$`;
+            } else {
+                // União de intervalos
+                let intervalos = [];
+                partes.forEach(parte => {
+                    if (parte.includes('x <')) {
+                        const num = parte.match(/[-\d\.]+/)[0];
+                        intervalos.push(`(-\\infty, ${num})`);
+                    } else if (parte.includes('x >')) {
+                        const num = parte.match(/[-\d\.]+/)[0];
+                        intervalos.push(`(${num}, \\infty)`);
+                    } else if (parte.includes('x ≤')) {
+                        const num = parte.match(/[-\d\.]+/)[0];
+                        intervalos.push(`(-\\infty, ${num}]`);
+                    } else if (parte.includes('x ≥')) {
+                        const num = parte.match(/[-\d\.]+/)[0];
+                        intervalos.push(`[${num}, \\infty)`);
+                    } else if (parte.includes('≤ x ≤')) {
+                        const nums = parte.match(/[-\d\.]+/g);
+                        intervalos.push(`[${nums[0]}, ${nums[1]}]`);
+                    }
+                });
+                divPassos.innerHTML += `$${intervalos.join(' \\cup ')}$`;
+            }
+            divPassos.innerHTML += `</p>`;
         }
 
     } catch (err) {
         divPassos.innerHTML = `<p style="color:red;">Error: ${err}</p>`;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 
     renderMathJax();
 }
 
-// ===== EQUAÇÃO CÚBICA =====
+// ===== EQUAÇÃO CÚBICA (SEM DESIGUALDADES) =====
 function formatarEquacaoCubica(a, b, c, d, e) {
     let esquerda = '';
     if (a !== 0) {
         if (a === 1) esquerda += 'x^3';
         else if (a === -1) esquerda += '-x^3';
         else esquerda += `${formatarNumeroInteiro(a)}x^3`;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
     if (b > 0) esquerda += ` + ${formatarNumeroInteiro(b)}x^2`;
     else if (b < 0) esquerda += ` - ${formatarNumeroInteiro(-b)}x^2`;
@@ -582,19 +757,6 @@ function resolverCubicaCardano(a, b, c, d) {
         const complexReal = -(u + v)/2 - b/(3*a);
         const complexImag = (u - v) * Math.sqrt(3)/2;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
         return {
             tipo: 'uma_real_duas_complexas',
             raizReal: raizReal,
@@ -614,7 +776,7 @@ function resolverCubicaCardano(a, b, c, d) {
             raiz3: raiz2 // Raiz dupla
         };
     } else {
-        // Três raízes reais distintas
+        // Três raízes real distintas
         const r = Math.sqrt(-p*p*p/27);
         const phi = Math.acos(-q/(2*r));
 
@@ -641,19 +803,9 @@ function resolverCubic() {
     divPassos.innerHTML = '';
 
     if (isNaN(a) || isNaN(b) || isNaN(c) || isNaN(d) || isNaN(e)) {
-        divPassos.innerHTML = `<p style="color:red;">❌ Invalid mathematical expression. Please use numbers, fractions (a/b) or square roots (√n).</p>`;
+        divPassos.innerHTML = `<p style="color:red;">❌ Invalid mathematical expression.</p>`;
         renderMathJax();
         return;
-
-
-
-
-
-
-
-
-
-
     }
 
     if (a === 0 && b === 0 && c === 0 && d === 0 && e === 0) {
@@ -713,14 +865,6 @@ function resolverCubic() {
             }
         }
 
-
-
-
-
-
-
-
-
         // Remover duplicatas e ordenar
         const raizesUnicas = [...new Set(raizesPossiveis)].sort((x, y) => Math.abs(x) - Math.abs(y));
 
@@ -732,8 +876,6 @@ function resolverCubic() {
                 // Se encontramos 3 raízes, parar a busca
                 if (raizes.length === 3) break;
             }
-
-
         }
 
         divPassos.innerHTML += `<div class="step"><p><strong>Step 3: Finding Roots</strong></p>`;
@@ -761,14 +903,8 @@ function resolverCubic() {
             divPassos.innerHTML += `<p><strong>Step 4: Complex Roots Analysis</strong></p>`;
             divPassos.innerHTML += `<p>Using Cardano's method to find all roots...</p>`;
 
-
             // Usar método de Cardano para encontrar raízes complexas
             const resultadoCardano = resolverCubicaCardano(a, b, c, constante);
-
-
-
-
-
 
             if (resultadoCardano.tipo === 'uma_real_duas_complexas') {
                 divPassos.innerHTML += `<p>Complete solution:</p>`;
@@ -791,7 +927,6 @@ function resolverCubic() {
 
             // Usar método de Cardano
             const resultadoCardano = resolverCubicaCardano(a, b, c, constante);
-
 
             if (resultadoCardano.tipo === 'uma_real_duas_complexas') {
                 divPassos.innerHTML += `<p>The equation has one real root and two complex roots:</p>`;
@@ -817,7 +952,7 @@ function resolverCubic() {
     renderMathJax();
 }
 
-// ===== EQUAÇÃO QUÁRTICA SIMPLES - APENAS RAÍZES REAIS =====
+// ===== EQUAÇÃO QUÁRTICA SIMPLES (SEM DESIGUALDADES) =====
 function formatarEquacaoQuartica(a, b, c, d, e, f_val) {
     let esquerda = '';
     if (a !== 0) {
@@ -859,25 +994,11 @@ function encontrarRaizesReaisQuartic(a, b, c, d, e) {
 
                 if (Math.abs(df) < 1e-12) break;
 
-
                 const novaRaiz = raizRefinada - f_val / df;
-
-
-
-
-
-
-
-
-
-
 
                 if (Math.abs(novaRaiz - raizRefinada) < 1e-12) {
                     raizRefinada = novaRaiz;
                     break;
-
-
-
                 }
                 raizRefinada = novaRaiz;
             }
@@ -888,7 +1009,6 @@ function encontrarRaizesReaisQuartic(a, b, c, d, e) {
                 if (Math.abs(r - raizRefinada) < 0.01) {
                     novaRaiz = false;
                     break;
-
                 }
             }
 
@@ -896,7 +1016,6 @@ function encontrarRaizesReaisQuartic(a, b, c, d, e) {
                 raizes.push(raizRefinada);
                 if (raizes.length >= 4) break;
             }
-
         }
     }
 
@@ -914,7 +1033,7 @@ function resolverQuartic() {
     divPassos.innerHTML = '';
     
     if (isNaN(a) || isNaN(b) || isNaN(c) || isNaN(d) || isNaN(e) || isNaN(f_val)) {
-        divPassos.innerHTML = `<p style="color:red;">❌ Invalid mathematical expression. Please use numbers, fractions (a/b) or square roots (√n).</p>`;
+        divPassos.innerHTML = `<p style="color:red;">❌ Invalid mathematical expression.</p>`;
         renderMathJax();
         return;
     }
@@ -923,14 +1042,6 @@ function resolverQuartic() {
         divPassos.innerHTML = `<p style="color:orange;">⚠️ Please enter the coefficients</p>`;
         renderMathJax();
         return;
-
-
-
-
-
-
-
-
     }
 
     try {
@@ -940,11 +1051,6 @@ function resolverQuartic() {
 
         divPassos.innerHTML += `<div class="step"><p><strong>Step 2: Standard Form</strong></p>`;
         divPassos.innerHTML += `<p>$$${formatarNumeroInteiro(a)}x^4 + ${formatarNumeroInteiro(b)}x^3 + ${formatarNumeroInteiro(c)}x^2 + ${formatarNumeroInteiro(d)}x + ${formatarNumeroInteiro(constante)} = 0$$</p></div>`;
-
-
-
-
-
 
         if (a === 0) {
             // Equação cúbica
@@ -957,16 +1063,6 @@ function resolverQuartic() {
                 });
             } else {
                 divPassos.innerHTML += `<p>No real roots found.</p>`;
-
-
-
-
-
-
-
-
-
-
             }
             renderMathJax();
             return;
@@ -974,64 +1070,13 @@ function resolverQuartic() {
 
         divPassos.innerHTML += `<div class="step"><p><strong>Step 3: Finding Real Roots</strong></p>`;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         const raizes = encontrarRaizesReaisQuartic(a, b, c, d, constante);
-
-
-
-
-
 
         if (raizes.length > 0) {
             divPassos.innerHTML += `<p>Found ${raizes.length} real root(s):</p>`;
             raizes.forEach((raiz, idx) => {
                 divPassos.innerHTML += `<p>$$x_{${idx+1}} = ${formatarNumeroInteiro(raiz)}$$</p>`;
             });
-
-
-
-
-
-
-
-
-
-
 
             // Mostrar forma fatorada se todas as raízes forem racionais
             if (raizes.length === 4) {
@@ -1055,9 +1100,9 @@ function resolverQuartic() {
     renderMathJax();
 }
 
-// ===== EQUAÇÃO EXPONENCIAL =====
-function formatarEquacaoExponencial(Q, Q0, a, t) {
-    return `$$${formatarNumeroInteiro(Q)} = ${formatarNumeroInteiro(Q0)} \\cdot ${formatarNumeroInteiro(a)}^${formatarNumeroInteiro(t)}$$`;
+// ===== EQUAÇÃO EXPONENCIAL COM DESIGUALDADES =====
+function formatarEquacaoExponencial(Q, Q0, a, t, simbolo) {
+    return `$$${formatarNumeroInteiro(Q)} ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(Q0)} \\cdot ${formatarNumeroInteiro(a)}^${formatarNumeroInteiro(t)}$$`;
 }
 
 function resolverExponential() {
@@ -1065,6 +1110,7 @@ function resolverExponential() {
     const Q0 = obterValorMatematico('expQ0');
     const a = obterValorMatematico('expA');
     const t = obterValorMatematico('expT');
+    const simbolo = document.getElementById('expInequality').value;
     const divPassos = document.getElementById('exponentialSteps');
     divPassos.innerHTML = '';
 
@@ -1072,94 +1118,161 @@ function resolverExponential() {
     const campos = [Q, Q0, a, t];
     const camposPreenchidos = campos.filter(val => !isNaN(val)).length;
 
-
-
     if (camposPreenchidos < 3) {
-        divPassos.innerHTML = `<p style="color:orange;">⚠️ Please fill exactly 3 values to solve for the unknown</p>`;
+        divPassos.innerHTML = `<p style="color:orange;">⚠️ Please fill exactly 3 values</p>`;
         renderMathJax();
         return;
+    }
 
-
+    // Verificar restrições
+    if (!isNaN(Q0) && Q0 <= 0) {
+        divPassos.innerHTML = `<p style="color:red;">❌ Q₀ must be positive</p>`;
+        renderMathJax();
+        return;
+    }
+    
+    if (!isNaN(a) && a <= 0) {
+        divPassos.innerHTML = `<p style="color:red;">❌ Base a must be positive</p>`;
+        renderMathJax();
+        return;
     }
 
     try {
-        divPassos.innerHTML += `<div class="step"><p><strong>Step 1: Equation</strong></p>`;
-        divPassos.innerHTML += `<p>${formatarEquacaoExponencial(Q, Q0, a, t)}</p></div>`;
-
-
-
         // Determinar qual variável está faltando
         let variavelFaltante = '';
-        let valorCalculado = null;
         
+        if (isNaN(Q)) variavelFaltante = 'Q';
+        else if (isNaN(Q0)) variavelFaltante = 'Q₀';
+        else if (isNaN(a)) variavelFaltante = 'a';
+        else if (isNaN(t)) variavelFaltante = 't';
+        
+        divPassos.innerHTML += `<div class="step"><p><strong>Step 1: Inequality</strong></p>`;
+        
+        let expressao = '';
+        if (variavelFaltante === 'Q') {
+            expressao = `Q ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(Q0)} \\cdot ${formatarNumeroInteiro(a)}^${formatarNumeroInteiro(t)}`;
+        }
+        else if (variavelFaltante === 'Q₀') {
+            expressao = `${formatarNumeroInteiro(Q)} ${formatarDesigualdade(simbolo)} Q₀ \\cdot ${formatarNumeroInteiro(a)}^${formatarNumeroInteiro(t)}`;
+        }
+        else if (variavelFaltante === 'a') {
+            expressao = `${formatarNumeroInteiro(Q)} ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(Q0)} \\cdot a^${formatarNumeroInteiro(t)}`;
+        }
+        else if (variavelFaltante === 't') {
+            expressao = `${formatarNumeroInteiro(Q)} ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(Q0)} \\cdot ${formatarNumeroInteiro(a)}^t`;
+        }
+        
+        divPassos.innerHTML += `<p>$$${expressao}$$</p></div>`;
+
+        // Resolver para cada caso
         if (isNaN(Q)) {
-            variavelFaltante = 'Q';
-            valorCalculado = Q0 * Math.pow(a, t);
+            // Resolver para Q
+            const valorDireito = Q0 * Math.pow(a, t);
             divPassos.innerHTML += `<div class="step"><p><strong>Step 2: Solve for Q</strong></p>`;
-            divPassos.innerHTML += `<p>$$Q = ${formatarNumeroInteiro(Q0)} \\cdot ${formatarNumeroInteiro(a)}^${formatarNumeroInteiro(t)}$$</p>`;
-            divPassos.innerHTML += `<p>$$Q = ${formatarNumeroInteiro(Q0)} \\cdot ${formatarNumeroInteiro(Math.pow(a, t))}$$</p>`;
-            divPassos.innerHTML += `<p>$$Q = ${formatarNumeroInteiro(valorCalculado)}$$</p></div>`;
+            divPassos.innerHTML += `<p>$$Q ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(valorDireito)}$$</p>`;
+            
+            divPassos.innerHTML += `<div class="step"><p><strong>Step 3: Solution</strong></p>`;
+            divPassos.innerHTML += `<p>$$Q ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(valorDireito)}$$</p>`;
+            
+            if (simbolo === '>=' || simbolo === '<=') {
+                divPassos.innerHTML += `<p><strong>Interval notation:</strong> `;
+                if (simbolo === '>=') {
+                    divPassos.innerHTML += `$$[${formatarNumeroInteiro(valorDireito)}, \\infty)$$`;
+                } else {
+                    divPassos.innerHTML += `$$(-\\infty, ${formatarNumeroInteiro(valorDireito)}]$$`;
+                }
+                divPassos.innerHTML += `</p>`;
+            }
         }
         else if (isNaN(Q0)) {
-            variavelFaltante = 'Q₀';
-            valorCalculado = Q / Math.pow(a, t);
-            divPassos.innerHTML += `<div class="step"><p><strong>Step 2: Solve for Q₀</strong></p>`;
-            divPassos.innerHTML += `<p>$$Q_0 = \\frac{Q}{a^t} = \\frac{${formatarNumeroInteiro(Q)}}{${formatarNumeroInteiro(a)}^${formatarNumeroInteiro(t)}}$$</p>`;
-            divPassos.innerHTML += `<p>$$Q_0 = \\frac{${formatarNumeroInteiro(Q)}}{${formatarNumeroInteiro(Math.pow(a, t))}}$$</p>`;
-            divPassos.innerHTML += `<p>$$Q_0 = ${formatarNumeroInteiro(valorCalculado)}$$</p></div>`;
+            // Resolver para Q₀
+            divPassos.innerHTML += `<div class="step"><p><strong>Step 2: Isolate Q₀</strong></p>`;
+            
+            const potencia = Math.pow(a, t);
+            divPassos.innerHTML += `<p>$$Q_0 ${formatarDesigualdade(simbolo)} \\frac{${formatarNumeroInteiro(Q)}}{${formatarNumeroInteiro(potencia)}}$$</p>`;
+            
+            const valorCalculado = Q / potencia;
+            divPassos.innerHTML += `<div class="step"><p><strong>Step 3: Solution</strong></p>`;
+            divPassos.innerHTML += `<p>$$Q_0 ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(valorCalculado)}$$</p>`;
+            
+            // Adicionar restrição de positividade
+            divPassos.innerHTML += `<p class="solution-note"><strong>Note:</strong> Since Q₀ represents an initial quantity, it must be positive: Q₀ > 0</p>`;
         }
         else if (isNaN(a)) {
-            variavelFaltante = 'a';
-            valorCalculado = Math.pow(Q / Q0, 1/t);
-            divPassos.innerHTML += `<div class="step"><p><strong>Step 2: Solve for a</strong></p>`;
-            divPassos.innerHTML += `<p>$$a^t = \\frac{Q}{Q_0} = \\frac{${formatarNumeroInteiro(Q)}}{${formatarNumeroInteiro(Q0)}} = ${formatarNumeroInteiro(Q/Q0)}$$</p>`;
-            divPassos.innerHTML += `<p>$$a = \\sqrt[${formatarNumeroInteiro(t)}]{${formatarNumeroInteiro(Q/Q0)}}$$</p>`;
-            divPassos.innerHTML += `<p>$$a = ${formatarNumeroInteiro(valorCalculado)}$$</p></div>`;
+            // Resolver para a
+            divPassos.innerHTML += `<div class="step"><p><strong>Step 2: Isolate a</strong></p>`;
+            
+            const razao = Q / Q0;
+            divPassos.innerHTML += `<p>$$a^${formatarNumeroInteiro(t)} ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(razao)}$$</p>`;
+            
+            if (t % 2 === 0) {
+                // Expoente par - cuidado com inequações
+                divPassos.innerHTML += `<p class="solution-note"><strong>Note:</strong> Since exponent ${formatarNumeroInteiro(t)} is even, we must consider both positive and negative roots for equations, but base a must be positive for exponential functions: a > 0</p>`;
+                
+                if (simbolo === '=') {
+                    divPassos.innerHTML += `<p>$$a = \\sqrt[${formatarNumeroInteiro(t)}]{${formatarNumeroInteiro(razao)}}$$</p>`;
+                    const valorCalculado = Math.pow(razao, 1/t);
+                    divPassos.innerHTML += `<p>$$a = ${formatarNumeroInteiro(valorCalculado)}$$</p>`;
+                } else {
+                    divPassos.innerHTML += `<p><strong>Analysis needed for inequality with even exponent.</strong></p>`;
+                }
+            } else {
+                // Expoente ímpar - mais simples
+                divPassos.innerHTML += `<p>$$a ${formatarDesigualdade(simbolo)} \\sqrt[${formatarNumeroInteiro(t)}]{${formatarNumeroInteiro(razao)}}$$</p>`;
+                const valorCalculado = Math.pow(razao, 1/t);
+                divPassos.innerHTML += `<p>$$a ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(valorCalculado)}$$</p>`;
+            }
+            
+            divPassos.innerHTML += `<p class="solution-note"><strong>Note:</strong> Base a must be positive for exponential functions: a > 0</p>`;
         }
         else if (isNaN(t)) {
-            variavelFaltante = 't';
-            valorCalculado = Math.log(Q / Q0) / Math.log(a);
-            divPassos.innerHTML += `<div class="step"><p><strong>Step 2: Solve for t</strong></p>`;
-            divPassos.innerHTML += `<p>$$a^t = \\frac{Q}{Q_0} = \\frac{${formatarNumeroInteiro(Q)}}{${formatarNumeroInteiro(Q0)}} = ${formatarNumeroInteiro(Q/Q0)}$$</p>`;
-            divPassos.innerHTML += `<p>$$\\log(${formatarNumeroInteiro(a)}^t) = \\log(${formatarNumeroInteiro(Q/Q0)})$$</p>`;
-            divPassos.innerHTML += `<p>$$t \\cdot \\log(${formatarNumeroInteiro(a)}) = \\log(${formatarNumeroInteiro(Q/Q0)})$$</p>`;
-            divPassos.innerHTML += `<p>$$t = \\frac{\\log(${formatarNumeroInteiro(Q/Q0)})}{\\log(${formatarNumeroInteiro(a)})}$$</p>`;
-            divPassos.innerHTML += `<p>$$t = ${formatarNumeroInteiro(valorCalculado)}$$</p></div>`;
+            // Resolver para t usando logaritmos
+            divPassos.innerHTML += `<div class="step"><p><strong>Step 2: Apply Logarithms</strong></p>`;
+            
+            const razao = Q / Q0;
+            if (razao <= 0) {
+                divPassos.innerHTML += `<p style="color:red;">❌ Ratio Q/Q₀ must be positive</p>`;
+                renderMathJax();
+                return;
+            }
+            
+            divPassos.innerHTML += `<p>$$${formatarNumeroInteiro(a)}^t ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(razao)}$$</p>`;
+            
+            if (a > 1) {
+                // Função crescente - mantém a desigualdade
+                divPassos.innerHTML += `<p>Since $a > 1$, the exponential function is increasing.</p>`;
+                
+                if (simbolo === '=') {
+                    divPassos.innerHTML += `<p>$$\\log(${formatarNumeroInteiro(a)}^t) = \\log(${formatarNumeroInteiro(razao)})$$</p>`;
+                    divPassos.innerHTML += `<p>$$t \\cdot \\log(${formatarNumeroInteiro(a)}) = \\log(${formatarNumeroInteiro(razao)})$$</p>`;
+                    const valorCalculado = Math.log(razao) / Math.log(a);
+                    divPassos.innerHTML += `<p>$$t = \\frac{\\log(${formatarNumeroInteiro(razao)})}{\\log(${formatarNumeroInteiro(a)})} = ${formatarNumeroInteiro(valorCalculado)}$$</p>`;
+                } else {
+                    divPassos.innerHTML += `<p>$$t ${formatarDesigualdade(simbolo)} \\log_{${formatarNumeroInteiro(a)}}(${formatarNumeroInteiro(razao)})$$</p>`;
+                    const valorCalculado = Math.log(razao) / Math.log(a);
+                    divPassos.innerHTML += `<p>$$t ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(valorCalculado)}$$</p>`;
+                }
+            } else if (a < 1 && a > 0) {
+                // Função decrescente - inverte a desigualdade
+                divPassos.innerHTML += `<p>Since $0 < a < 1$, the exponential function is decreasing.</p>`;
+                
+                if (simbolo === '=') {
+                    divPassos.innerHTML += `<p>$$t = \\frac{\\log(${formatarNumeroInteiro(razao)})}{\\log(${formatarNumeroInteiro(a)})}$$</p>`;
+                    const valorCalculado = Math.log(razao) / Math.log(a);
+                    divPassos.innerHTML += `<p>$$t = ${formatarNumeroInteiro(valorCalculado)}$$</p>`;
+                } else {
+                    let novoSímbolo = simbolo;
+                    if (simbolo === '>') novoSímbolo = '<';
+                    if (simbolo === '<') novoSímbolo = '>';
+                    if (simbolo === '>=') novoSímbolo = '<=';
+                    if (simbolo === '<=') novoSímbolo = '>=';
+                    
+                    divPassos.innerHTML += `<p>$$t ${formatarDesigualdade(novoSímbolo)} \\log_{${formatarNumeroInteiro(a)}}(${formatarNumeroInteiro(razao)})$$</p>`;
+                    const valorCalculado = Math.log(razao) / Math.log(a);
+                    divPassos.innerHTML += `<p>$$t ${formatarDesigualdade(novoSímbolo)} ${formatarNumeroInteiro(valorCalculado)}$$</p>`;
+                }
+            }
         }
-
-        divPassos.innerHTML += `<div class="step"><p><strong>Step 3: Final Solution</strong></p>`;
-        divPassos.innerHTML += `<p>$$${variavelFaltante} = ${formatarNumeroInteiro(valorCalculado)}$$</p></div>`;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     } catch (err) {
         divPassos.innerHTML = `<p style="color:red;">Error: ${err}</p>`;
@@ -1168,15 +1281,16 @@ function resolverExponential() {
     renderMathJax();
 }
 
-// ===== EQUAÇÃO LOGARÍTMICA =====
-function formatarEquacaoLogaritmica(base, argument, result) {
-    return `$$\\log_{${formatarNumeroInteiro(base)}}(${formatarNumeroInteiro(argument)}) = ${formatarNumeroInteiro(result)}$$`;
+// ===== EQUAÇÃO LOGARÍTMICA COM DESIGUALDADES =====
+function formatarEquacaoLogaritmica(base, argument, result, simbolo) {
+    return `$$\\log_{${formatarNumeroInteiro(base)}}(${formatarNumeroInteiro(argument)}) ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(result)}$$`;
 }
 
 function resolverLogarithmic() {
     const base = obterValorMatematico('logBase');
     const argument = obterValorMatematico('logArgument');
     const result = obterValorMatematico('logResult');
+    const simbolo = document.getElementById('logInequality').value;
     const divPassos = document.getElementById('logarithmicSteps');
     divPassos.innerHTML = '';
     
@@ -1185,70 +1299,120 @@ function resolverLogarithmic() {
     const camposPreenchidos = campos.filter(val => !isNaN(val)).length;
     
     if (camposPreenchidos < 2) {
-        divPassos.innerHTML = `<p style="color:orange;">⚠️ Please fill exactly 2 values to solve for the unknown</p>`;
+        divPassos.innerHTML = `<p style="color:orange;">⚠️ Please fill exactly 2 values</p>`;
         renderMathJax();
         return;
     }
     
     // Verificar restrições
     if (!isNaN(base) && (base <= 0 || base === 1)) {
-        divPassos.innerHTML = `<p style="color:red;">❌ The base must be positive and different from 1</p>`;
+        divPassos.innerHTML = `<p style="color:red;">❌ Base must be positive and ≠ 1</p>`;
         renderMathJax();
         return;
     }
     
     if (!isNaN(argument) && argument <= 0) {
-        divPassos.innerHTML = `<p style="color:red;">❌ The argument must be positive</p>`;
+        divPassos.innerHTML = `<p style="color:red;">❌ Argument must be positive</p>`;
         renderMathJax();
         return;
-
-
     }
 
     try {
-        divPassos.innerHTML += `<div class="step"><p><strong>Step 1: Equation</strong></p>`;
-        divPassos.innerHTML += `<p>${formatarEquacaoLogaritmica(base, argument, result)}</p></div>`;
+        divPassos.innerHTML += `<div class="step"><p><strong>Step 1: Inequality</strong></p>`;
         
         // Determinar qual variável está faltando
-        let variavelFaltante = '';
-        let valorCalculado = null;
-
+        let expressao = '';
+        
         if (isNaN(base)) {
-            variavelFaltante = 'base';
-            valorCalculado = Math.pow(argument, 1/result);
-            divPassos.innerHTML += `<div class="step"><p><strong>Step 2: Solve for base</strong></p>`;
-            divPassos.innerHTML += `<p>$$\\log_b(${formatarNumeroInteiro(argument)}) = ${formatarNumeroInteiro(result)}$$</p>`;
-            divPassos.innerHTML += `<p>$$b^{${formatarNumeroInteiro(result)}} = ${formatarNumeroInteiro(argument)}$$</p>`;
-            divPassos.innerHTML += `<p>$$b = \\sqrt[${formatarNumeroInteiro(result)}]{${formatarNumeroInteiro(argument)}}$$</p>`;
-            divPassos.innerHTML += `<p>$$b = ${formatarNumeroInteiro(valorCalculado)}$$</p></div>`;
+            expressao = `\\log_b(${formatarNumeroInteiro(argument)}) ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(result)}`;
         }
         else if (isNaN(argument)) {
-            variavelFaltante = 'argument';
-            valorCalculado = Math.pow(base, result);
-            divPassos.innerHTML += `<div class="step"><p><strong>Step 2: Solve for argument</strong></p>`;
-            divPassos.innerHTML += `<p>$$\\log_{${formatarNumeroInteiro(base)}}(x) = ${formatarNumeroInteiro(result)}$$</p>`;
-            divPassos.innerHTML += `<p>$$x = ${formatarNumeroInteiro(base)}^{${formatarNumeroInteiro(result)}}$$</p>`;
-            divPassos.innerHTML += `<p>$$x = ${formatarNumeroInteiro(valorCalculado)}$$</p></div>`;
+            expressao = `\\log_{${formatarNumeroInteiro(base)}}(x) ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(result)}`;
         }
         else if (isNaN(result)) {
-            variavelFaltante = 'result';
-            valorCalculado = Math.log(argument) / Math.log(base);
-            divPassos.innerHTML += `<div class="step"><p><strong>Step 2: Solve for result</strong></p>`;
-            divPassos.innerHTML += `<p>$$\\log_{${formatarNumeroInteiro(base)}}(${formatarNumeroInteiro(argument)}) = x$$</p>`;
-            divPassos.innerHTML += `<p>$$x = \\frac{\\log(${formatarNumeroInteiro(argument)})}{\\log(${formatarNumeroInteiro(base)})}$$</p>`;
-            divPassos.innerHTML += `<p>$$x = ${formatarNumeroInteiro(valorCalculado)}$$</p></div>`;
+            expressao = `\\log_{${formatarNumeroInteiro(base)}}(${formatarNumeroInteiro(argument)}) ${formatarDesigualdade(simbolo)} x`;
         }
+        
+        divPassos.innerHTML += `<p>$$${expressao}$$</p></div>`;
 
-        divPassos.innerHTML += `<div class="step"><p><strong>Step 3: Final Solution</strong></p>`;
-        divPassos.innerHTML += `<p>$$${variavelFaltante} = ${formatarNumeroInteiro(valorCalculado)}$$</p></div>`;
-
-
-
-        // Mostrar propriedades do logaritmo
-        divPassos.innerHTML += `<div class="step"><p><strong>Step 4: Logarithm Properties</strong></p>`;
-        divPassos.innerHTML += `<p>• Definition: $\\log_b(a) = c \\iff b^c = a$</p>`;
-        divPassos.innerHTML += `<p>• Change of base: $\\log_b(a) = \\frac{\\log(a)}{\\log(b)}$</p>`;
-        divPassos.innerHTML += `<p>• Verification: $${formatarNumeroInteiro(base)}^{${formatarNumeroInteiro(isNaN(result) ? valorCalculado : result)}} = ${formatarNumeroInteiro(isNaN(argument) ? valorCalculado : argument)}$</p></div>`;
+        // Resolver para cada caso
+        if (isNaN(base)) {
+            // Resolver para base
+            divPassos.innerHTML += `<div class="step"><p><strong>Step 2: Convert to Exponential Form</strong></p>`;
+            
+            if (simbolo === '=') {
+                divPassos.innerHTML += `<p>$$b^{${formatarNumeroInteiro(result)}} = ${formatarNumeroInteiro(argument)}$$</p>`;
+                const valorCalculado = Math.pow(argument, 1/result);
+                divPassos.innerHTML += `<p>$$b = \\sqrt[${formatarNumeroInteiro(result)}]{${formatarNumeroInteiro(argument)}} = ${formatarNumeroInteiro(valorCalculado)}$$</p>`;
+            } else {
+                divPassos.innerHTML += `<p><strong>Analysis for logarithmic inequalities with unknown base:</strong></p>`;
+                divPassos.innerHTML += `<p>We need to consider cases based on whether b > 1 or 0 < b < 1.</p>`;
+                
+                if (result > 0) {
+                    divPassos.innerHTML += `<p>Since the logarithm result is positive (${formatarNumeroInteiro(result)} > 0):</p>`;
+                    divPassos.innerHTML += `<p>• If b > 1: $b > \\sqrt[${formatarNumeroInteiro(result)}]{${formatarNumeroInteiro(argument)}}$</p>`;
+                    divPassos.innerHTML += `<p>• If 0 < b < 1: $b < \\sqrt[${formatarNumeroInteiro(result)}]{${formatarNumeroInteiro(argument)}}$</p>`;
+                } else if (result < 0) {
+                    divPassos.innerHTML += `<p>Since the logarithm result is negative (${formatarNumeroInteiro(result)} < 0):</p>`;
+                    divPassos.innerHTML += `<p>• If b > 1: $b < \\sqrt[${formatarNumeroInteiro(result)}]{${formatarNumeroInteiro(argument)}}$</p>`;
+                    divPassos.innerHTML += `<p>• If 0 < b < 1: $b > \\sqrt[${formatarNumeroInteiro(result)}]{${formatarNumeroInteiro(argument)}}$</p>`;
+                }
+            }
+            
+            divPassos.innerHTML += `<p class="solution-note"><strong>Note:</strong> Base b must satisfy: b > 0 and b ≠ 1</p>`;
+        }
+        else if (isNaN(argument)) {
+            // Resolver para argumento
+            divPassos.innerHTML += `<div class="step"><p><strong>Step 2: Convert to Exponential Form</strong></p>`;
+            
+            if (base > 1) {
+                // Função logarítmica crescente
+                if (simbolo === '=') {
+                    divPassos.innerHTML += `<p>$$x = ${formatarNumeroInteiro(base)}^{${formatarNumeroInteiro(result)}}$$</p>`;
+                    const valorCalculado = Math.pow(base, result);
+                    divPassos.innerHTML += `<p>$$x = ${formatarNumeroInteiro(valorCalculado)}$$</p>`;
+                } else {
+                    divPassos.innerHTML += `<p>Since base ${formatarNumeroInteiro(base)} > 1, the logarithmic function is increasing.</p>`;
+                    divPassos.innerHTML += `<p>$$x ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(base)}^{${formatarNumeroInteiro(result)}}$$</p>`;
+                    const valorCalculado = Math.pow(base, result);
+                    divPassos.innerHTML += `<p>$$x ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(valorCalculado)}$$</p>`;
+                }
+            } else if (base < 1 && base > 0) {
+                // Função logarítmica decrescente
+                if (simbolo === '=') {
+                    divPassos.innerHTML += `<p>$$x = ${formatarNumeroInteiro(base)}^{${formatarNumeroInteiro(result)}}$$</p>`;
+                    const valorCalculado = Math.pow(base, result);
+                    divPassos.innerHTML += `<p>$$x = ${formatarNumeroInteiro(valorCalculado)}$$</p>`;
+                } else {
+                    divPassos.innerHTML += `<p>Since 0 < base ${formatarNumeroInteiro(base)} < 1, the logarithmic function is decreasing.</p>`;
+                    let novoSímbolo = simbolo;
+                    if (simbolo === '>') novoSímbolo = '<';
+                    if (simbolo === '<') novoSímbolo = '>';
+                    if (simbolo === '>=') novoSímbolo = '<=';
+                    if (simbolo === '<=') novoSímbolo = '>=';
+                    
+                    divPassos.innerHTML += `<p>$$x ${formatarDesigualdade(novoSímbolo)} ${formatarNumeroInteiro(base)}^{${formatarNumeroInteiro(result)}}$$</p>`;
+                    const valorCalculado = Math.pow(base, result);
+                    divPassos.innerHTML += `<p>$$x ${formatarDesigualdade(novoSímbolo)} ${formatarNumeroInteiro(valorCalculado)}$$</p>`;
+                }
+            }
+            
+            divPassos.innerHTML += `<p class="solution-note"><strong>Note:</strong> Argument x must be positive: x > 0</p>`;
+        }
+        else if (isNaN(result)) {
+            // Resolver para resultado
+            divPassos.innerHTML += `<div class="step"><p><strong>Step 2: Calculate Result</strong></p>`;
+            
+            const valorCalculado = Math.log(argument) / Math.log(base);
+            
+            if (simbolo === '=') {
+                divPassos.innerHTML += `<p>$$x = \\log_{${formatarNumeroInteiro(base)}}(${formatarNumeroInteiro(argument)})$$</p>`;
+                divPassos.innerHTML += `<p>$$x = \\frac{\\log(${formatarNumeroInteiro(argument)})}{\\log(${formatarNumeroInteiro(base)})} = ${formatarNumeroInteiro(valorCalculado)}$$</p>`;
+            } else {
+                divPassos.innerHTML += `<p>$$x ${formatarDesigualdade(simbolo)} \\log_{${formatarNumeroInteiro(base)}}(${formatarNumeroInteiro(argument)})$$</p>`;
+                divPassos.innerHTML += `<p>$$x ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(valorCalculado)}$$</p>`;
+            }
+        }
 
     } catch (err) {
         divPassos.innerHTML = `<p style="color:red;">Error: ${err}</p>`;
@@ -1257,22 +1421,15 @@ function resolverLogarithmic() {
     renderMathJax();
 }
 
-// ===== EQUAÇÃO TRIGONOMÉTRICA =====
-function formatarEquacaoTrigonometrica(func, angle, value) {
-    return `$$\\${func}(${formatarNumeroInteiro(angle)}) = ${formatarNumeroInteiro(value)}$$`;
-}
-
-// Função para converter graus para radianos
+// ===== FUNÇÕES PARA TRIGONOMETRIA =====
 function paraRadianos(graus) {
     return graus * Math.PI / 180;
 }
 
-// Função para converter radianos para graus
 function paraGraus(radianos) {
     return radianos * 180 / Math.PI;
 }
 
-// Função para formatar radianos como frações de π
 function formatarComoFracaoPi(radianos) {
     if (Math.abs(radianos) < 1e-10) return "0";
     
@@ -1301,7 +1458,6 @@ function formatarComoFracaoPi(radianos) {
     return `${formatarNumeroInteiro(radianos)}`;
 }
 
-// Função para encontrar todas as soluções de uma equação trigonométrica
 function encontrarSolucoesTrigonometricas(func, valor, resolverParaX) {
     const solucoes = [];
     
@@ -1378,22 +1534,10 @@ function encontrarSolucoesTrigonometricas(func, valor, resolverParaX) {
             // Adicionar solução principal
             if (!todasSolucoes.some(s => Math.abs(s - solNormalizada) < 1e-10)) {
                 todasSolucoes.push(solNormalizada);
-
-
-
-
-
-
-
-
-
             }
         });
 
         return todasSolucoes.sort((a, b) => a - b);
-
-
-
     } else {
         // Resolver para o valor (y)
         const anguloRad = paraRadianos(angle);
@@ -1421,15 +1565,19 @@ function encontrarSolucoesTrigonometricas(func, valor, resolverParaX) {
         }
 
         return [resultado];
-
-
     }
+}
+
+// ===== EQUAÇÃO TRIGONOMÉTRICA COM DESIGUALDADES =====
+function formatarEquacaoTrigonometrica(func, angle, value, simbolo) {
+    return `$$\\${func}(${formatarNumeroInteiro(angle)}) ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(value)}$$`;
 }
 
 function resolverTrigonometric() {
     const func = document.getElementById('trigFunction').value;
     const angle = obterValorMatematico('trigAngle');
     const value = obterValorMatematico('trigValue');
+    const simbolo = document.getElementById('trigInequality').value;
     const divPassos = document.getElementById('trigonometricSteps');
     divPassos.innerHTML = '';
     
@@ -1438,27 +1586,23 @@ function resolverTrigonometric() {
     const valorPreenchido = !isNaN(value);
 
     if (!anguloPreenchido && !valorPreenchido) {
-        divPassos.innerHTML = `<p style="color:orange;">⚠️ Please fill the angle or value to solve</p>`;
+        divPassos.innerHTML = `<p style="color:orange;">⚠️ Please fill angle or value</p>`;
         renderMathJax();
         return;
     }
     
     if (anguloPreenchido && valorPreenchido) {
-        divPassos.innerHTML = `<p style="color:orange;">⚠️ Please leave one field empty to solve for the unknown</p>`;
+        divPassos.innerHTML = `<p style="color:orange;">⚠️ Please leave one field empty</p>`;
         renderMathJax();
         return;
     }
     
     try {
-        divPassos.innerHTML += `<div class="step"><p><strong>Step 1: Equation</strong></p>`;
+        divPassos.innerHTML += `<div class="step"><p><strong>Step 1: Inequality</strong></p>`;
         
-        let variavelFaltante = '';
-        let resultados = [];
-
         if (!anguloPreenchido) {
-            // ===== RESOLVER PARA O ÂNGULO (X) =====
-            variavelFaltante = 'x';
-            divPassos.innerHTML += `<p>$$\\${func}(x) = ${formatarNumeroInteiro(value)}$$</p></div>`;
+            // Resolver para o ângulo (x)
+            divPassos.innerHTML += `<p>$$\\${func}(x) ${formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(value)}$$</p></div>`;
             
             // Verificar domínio
             let dominioValido = true;
@@ -1467,14 +1611,16 @@ function resolverTrigonometric() {
             switch(func) {
                 case 'sin':
                 case 'cos':
-                    if (value < -1 || value > 1) {
-                        dominioValido = false;
-                        mensagemDominio = `The ${func} function only accepts values between -1 and 1.`;
+                    if (simbolo === '=') {
+                        if (value < -1 || value > 1) {
+                            dominioValido = false;
+                            mensagemDominio = `The ${func} function only accepts values between -1 and 1.`;
+                        }
                     }
                     break;
                 case 'sec':
                 case 'csc':
-                    if (Math.abs(value) < 1) {
+                    if (Math.abs(value) < 1 && (simbolo === '=' || simbolo === '<=' || simbolo === '>=')) {
                         dominioValido = false;
                         mensagemDominio = `The ${func} function requires |value| ≥ 1.`;
                     }
@@ -1487,212 +1633,129 @@ function resolverTrigonometric() {
                 return;
             }
             
-            // Passo 2: Encontrar soluções
-            divPassos.innerHTML += `
-                <div class="step">
-                    <p><strong>Step 2: Find Principal Solutions</strong></p>
-            `;
-            
-            resultados = encontrarSolucoesTrigonometricas(func, value, true);
-            
-            if (resultados.length === 0) {
-                divPassos.innerHTML += `<p>❌ No real solutions found.</p>`;
-            } else {
-                divPassos.innerHTML += `<p>Solving $\\${func}(x) = ${formatarNumeroInteiro(value)}$:</p>`;
-                
-                // Mostrar cálculo específico para cada função
-                switch(func) {
-                    case 'sin':
-                        divPassos.innerHTML += `<p>$$x = \\arcsin(${formatarNumeroInteiro(value)})$$</p>`;
-                        break;
-                    case 'cos':
-                        divPassos.innerHTML += `<p>$$x = \\arccos(${formatarNumeroInteiro(value)})$$</p>`;
-                        break;
-                    case 'tan':
-                        divPassos.innerHTML += `<p>$$x = \\arctan(${formatarNumeroInteiro(value)})$$</p>`;
-                        break;
-                    case 'sec':
-                        divPassos.innerHTML += `<p>$$\\sec(x) = ${formatarNumeroInteiro(value)} \\Rightarrow \\cos(x) = \\frac{1}{${formatarNumeroInteiro(value)}}$$</p>`;
-                        break;
-                    case 'csc':
-                        divPassos.innerHTML += `<p>$$\\csc(x) = ${formatarNumeroInteiro(value)} \\Rightarrow \\sin(x) = \\frac{1}{${formatarNumeroInteiro(value)}}$$</p>`;
-                        break;
-                    case 'cot':
-                        divPassos.innerHTML += `<p>$$\\cot(x) = ${formatarNumeroInteiro(value)} \\Rightarrow \\tan(x) = \\frac{1}{${formatarNumeroInteiro(value)}}$$</p>`;
-                        break;
-                }
-                
-                divPassos.innerHTML += `<p><strong>Principal solutions in [0, 2π):</strong></p>`;
-                
-                resultados.forEach((sol, idx) => {
-                    const solGraus = paraGraus(sol);
-                    const solPi = formatarComoFracaoPi(sol);
-                    divPassos.innerHTML += `
-                        <p>$$x_${idx+1} = ${solPi} \\text{ rad} = ${formatarNumeroInteiro(solGraus)}°$$</p>
-                    `;
-                });
+            // Encontrar soluções para a equação correspondente
+            let solucoesPrincipais = [];
+            if (simbolo === '=' || simbolo === '>=' || simbolo === '<=') {
+                // Encontrar pontos onde a igualdade ocorre
+                solucoesPrincipais = encontrarSolucoesTrigonometricas(func, value, true);
             }
             
-            divPassos.innerHTML += `</div>`; // Fecha Passo 2
+            divPassos.innerHTML += `
+                <div class="step">
+                    <p><strong>Step 2: Find Critical Points</strong></p>
+            `;
             
-            // Passo 3: Solução Geral
-            if (resultados.length > 0) {
-                divPassos.innerHTML += `
-                    <div class="step">
-                        <p><strong>Step 3: General Solution</strong></p>
-                `;
-                
-                let formulaGeral = '';
-                const periodo = func === 'tan' || func === 'cot' ? 'π' : '2π';
-                const k = 'k';
-                
-                switch(func) {
-                    case 'sin':
-                        const principalSin = resultados[0];
-                        const suplementarSin = resultados[1];
-                        formulaGeral = `x = ${formatarComoFracaoPi(principalSin)} + 2${k}π \\quad \\text{or} \\quad x = ${formatarComoFracaoPi(suplementarSin)} + 2${k}π`;
-                        break;
-                    case 'cos':
-                        const principalCos = resultados[0];
-                        formulaGeral = `x = ±${formatarComoFracaoPi(principalCos)} + 2${k}π`;
-                        break;
-                    case 'tan':
-                        const principalTan = resultados[0];
-                        formulaGeral = `x = ${formatarComoFracaoPi(principalTan)} + ${k}π`;
-                        break;
-                    case 'sec':
-                        const principalSec = resultados[0];
-                        formulaGeral = `x = ±${formatarComoFracaoPi(principalSec)} + 2${k}π`;
-                        break;
-                    case 'csc':
-                        const principalCsc = resultados[0];
-                        const suplementarCsc = resultados[1];
-                        formulaGeral = `x = ${formatarComoFracaoPi(principalCsc)} + 2${k}π \\quad \\text{or} \\quad x = ${formatarComoFracaoPi(suplementarCsc)} + 2${k}π`;
-                        break;
-                    case 'cot':
-                        const principalCot = resultados[0];
-                        formulaGeral = `x = ${formatarComoFracaoPi(principalCot)} + ${k}π`;
-                        break;
+            if (solucoesPrincipais.length === 0 && (simbolo === '=' || simbolo === '>=' || simbolo === '<=')) {
+                // Nenhum ponto de igualdade encontrado
+                if (simbolo === '=') {
+                    divPassos.innerHTML += `<p>No solutions found for $\\${func}(x) = ${formatarNumeroInteiro(value)}$</p>`;
+                } else {
+                    // Testar um ponto para determinar o sinal
+                    const pontoTeste = 0;
+                    let valorTeste;
+                    switch(func) {
+                        case 'sin': valorTeste = Math.sin(pontoTeste); break;
+                        case 'cos': valorTeste = Math.cos(pontoTeste); break;
+                        case 'tan': valorTeste = Math.tan(pontoTeste); break;
+                        case 'sec': valorTeste = 1/Math.cos(pontoTeste); break;
+                        case 'csc': valorTeste = 1/Math.sin(pontoTeste); break;
+                        case 'cot': valorTeste = 1/Math.tan(pontoTeste); break;
+                    }
+                    
+                    const satisfaz = eval(`${valorTeste} ${simbolo} ${value}`);
+                    if (satisfaz) {
+                        divPassos.innerHTML += `<p>✅ Inequality holds for all x where function is defined</p>`;
+                    } else {
+                        divPassos.innerHTML += `<p>❌ No solutions found</p>`;
+                    }
+                }
+            } else {
+                // Mostrar pontos críticos
+                if (solucoesPrincipais.length > 0) {
+                    divPassos.innerHTML += `<p><strong>Critical points where equality occurs:</strong></p>`;
+                    solucoesPrincipais.forEach((sol, idx) => {
+                        const solGraus = paraGraus(sol);
+                        divPassos.innerHTML += `<p>$$x_${idx+1} = ${formatarNumeroInteiro(solGraus)}°$$</p>`;
+                    });
                 }
                 
-                divPassos.innerHTML += `
-                    <p><strong>Complete solution:</strong></p>
-                    <p>$$${formulaGeral}, \\quad ${k} ∈ ℤ$$</p>
-                    <p class="solution-note">Where $${k}$ is any integer representing the periodicity of the trigonometric function.</p>
-                `;
+                // Análise de intervalos
+                divPassos.innerHTML += `<div class="step"><p><strong>Step 3: Interval Analysis</strong></p>`;
+                divPassos.innerHTML += `<p>Analyze the sign of $\\${func}(x) - ${formatarNumeroInteiro(value)}$ in each interval.</p>`;
                 
-                divPassos.innerHTML += `</div>`; // Fecha Passo 3
+                // Para simplificação, mostrar solução geral
+                divPassos.innerHTML += `<p><strong>General approach:</strong></p>`;
+                divPassos.innerHTML += `<p>1. Find where $\\${func}(x) = ${formatarNumeroInteiro(value)}$</p>`;
+                divPassos.innerHTML += `<p>2. Test points in each interval</p>`;
+                divPassos.innerHTML += `<p>3. Consider periodicity of $\\${func}(x)$</p>`;
+                
+                // Mostrar período da função
+                const periodo = func === 'tan' || func === 'cot' ? 'π' : '2π';
+                divPassos.innerHTML += `<p>Period of $\\${func}(x)$: ${periodo}</p>`;
             }
             
         } else {
-            // ===== RESOLVER PARA O VALOR (Y) =====
-            variavelFaltante = 'y';
-            divPassos.innerHTML += `<p>$$\\${func}(${formatarNumeroInteiro(angle)}) = y$$</p>`;
+            // Resolver para o valor (y)
+            divPassos.innerHTML += `<p>$$\\${func}(${formatarNumeroInteiro(angle)}) ${formatarDesigualdade(simbolo)} y$$</p>`;
             divPassos.innerHTML += `</div>`; // Fecha Passo 1
             
-            // Passo 2: Converter e calcular
-            divPassos.innerHTML += `
-                <div class="step">
-                    <p><strong>Step 2: Convert and Calculate</strong></p>
-            `;
-            
-            // Converter para radianos
+            // Converter para radianos e calcular
             const anguloRad = paraRadianos(angle);
-            divPassos.innerHTML += `<p>Convert angle to radians:</p>`;
-            divPassos.innerHTML += `<p>$$${formatarNumeroInteiro(angle)}° = ${formatarNumeroInteiro(anguloRad)} \\text{ rad}$$</p>`;
-            
-            divPassos.innerHTML += `<p><strong>Calculate the value:</strong></p>`;
-            
             let resultado;
-            let calculo = '';
-            let definicao = '';
             
             switch(func) {
-                case 'sin':
-                    resultado = Math.sin(anguloRad);
-                    calculo = `\\sin(${formatarComoFracaoPi(anguloRad)})`;
-                    definicao = "sine of the angle on the unit circle";
-                    break;
-                case 'cos':
-                    resultado = Math.cos(anguloRad);
-                    calculo = `\\cos(${formatarComoFracaoPi(anguloRad)})`;
-                    definicao = "cosine of the angle on the unit circle";
-                    break;
-                case 'tan':
+                case 'sin': resultado = Math.sin(anguloRad); break;
+                case 'cos': resultado = Math.cos(anguloRad); break;
+                case 'tan': 
+                    if (Math.abs(Math.cos(anguloRad)) < 1e-10) {
+                        divPassos.innerHTML += `<div class="step"><p style="color:red;">❌ Tangent undefined for this angle</p></div>`;
+                        renderMathJax();
+                        return;
+                    }
                     resultado = Math.tan(anguloRad);
+                    break;
+                case 'sec': 
                     if (Math.abs(Math.cos(anguloRad)) < 1e-10) {
-                        divPassos.innerHTML += `<p style="color:red;">❌ Tangent undefined for this angle (cos(angle) = 0)</p>`;
-                        divPassos.innerHTML += `</div>`;
+                        divPassos.innerHTML += `<div class="step"><p style="color:red;">❌ Secant undefined for this angle</p></div>`;
                         renderMathJax();
                         return;
                     }
-                    calculo = `\\tan(${formatarComoFracaoPi(anguloRad)}) = \\frac{\\sin(${formatarComoFracaoPi(anguloRad)})}{\\cos(${formatarComoFracaoPi(anguloRad)})}`;
-                    definicao = "ratio between sine and cosine";
-                    break;
-                case 'sec':
                     resultado = 1 / Math.cos(anguloRad);
-                    if (Math.abs(Math.cos(anguloRad)) < 1e-10) {
-                        divPassos.innerHTML += `<p style="color:red;">❌ Secant undefined for this angle (cos(angle) = 0)</p>`;
-                        divPassos.innerHTML += `</div>`;
+                    break;
+                case 'csc': 
+                    if (Math.abs(Math.sin(anguloRad)) < 1e-10) {
+                        divPassos.innerHTML += `<div class="step"><p style="color:red;">❌ Cosecant undefined for this angle</p></div>`;
                         renderMathJax();
                         return;
                     }
-                    calculo = `\\sec(${formatarComoFracaoPi(anguloRad)}) = \\frac{1}{\\cos(${formatarComoFracaoPi(anguloRad)})}`;
-                    definicao = "reciprocal of cosine";
-                    break;
-                case 'csc':
                     resultado = 1 / Math.sin(anguloRad);
-                    if (Math.abs(Math.sin(anguloRad)) < 1e-10) {
-                        divPassos.innerHTML += `<p style="color:red;">❌ Cosecant undefined for this angle (sin(angle) = 0)</p>`;
-                        divPassos.innerHTML += `</div>`;
-                        renderMathJax();
-                        return;
-                    }
-                    calculo = `\\csc(${formatarComoFracaoPi(anguloRad)}) = \\frac{1}{\\sin(${formatarComoFracaoPi(anguloRad)})}`;
-                    definicao = "reciprocal of sine";
                     break;
-                case 'cot':
-                    resultado = 1 / Math.tan(anguloRad);
+                case 'cot': 
                     if (Math.abs(Math.sin(anguloRad)) < 1e-10) {
-                        divPassos.innerHTML += `<p style="color:red;">❌ Cotangent undefined for this angle (sin(angle) = 0)</p>`;
-                        divPassos.innerHTML += `</div>`;
+                        divPassos.innerHTML += `<div class="step"><p style="color:red;">❌ Cotangent undefined for this angle</p></div>`;
                         renderMathJax();
                         return;
                     }
-                    calculo = `\\cot(${formatarComoFracaoPi(anguloRad)}) = \\frac{1}{\\tan(${formatarComoFracaoPi(anguloRad)})} = \\frac{\\cos(${formatarComoFracaoPi(anguloRad)})}{\\sin(${formatarComoFracaoPi(anguloRad)})}`;
-                    definicao = "reciprocal of tangent";
+                    resultado = 1 / Math.tan(anguloRad);
                     break;
             }
-            
-            resultados = [resultado];
             
             divPassos.innerHTML += `
-                <p>$$y = ${calculo}$$</p>
-                <p>$$y = ${formatarNumeroInteiro(resultado)}$$</p>
-                <p class="solution-note"><strong>Definition:</strong> ${definicao}</p>
+                <div class="step">
+                    <p><strong>Step 2: Calculate Value</strong></p>
+                    <p>$$\\${func}(${formatarNumeroInteiro(angle)}°) = ${formatarNumeroInteiro(resultado)}$$</p>
+                </div>
             `;
             
-            // Mostrar valor exato para ângulos comuns
-            const angulosComuns = {
-                0: {sin: '0', cos: '1', tan: '0', sec: '1', csc: '∞', cot: '∞'},
-                30: {sin: '\\frac{1}{2}', cos: '\\frac{\\sqrt{3}}{2}', tan: '\\frac{\\sqrt{3}}{3}', sec: '\\frac{2\\sqrt{3}}{3}', csc: '2', cot: '\\sqrt{3}'},
-                45: {sin: '\\frac{\\sqrt{2}}{2}', cos: '\\frac{\\sqrt{2}}{2}', tan: '1', sec: '\\sqrt{2}', csc: '\\sqrt{2}', cot: '1'},
-                60: {sin: '\\frac{\\sqrt{3}}{2}', cos: '\\frac{1}{2}', tan: '\\sqrt{3}', sec: '2', csc: '\\frac{2\\sqrt{3}}{3}', cot: '\\frac{\\sqrt{3}}{3}'},
-                90: {sin: '1', cos: '0', tan: '∞', sec: '∞', csc: '1', cot: '0'},
-                180: {sin: '0', cos: '-1', tan: '0', sec: '-1', csc: '∞', cot: '∞'},
-                270: {sin: '-1', cos: '0', tan: '∞', sec: '∞', csc: '-1', cot: '0'},
-                360: {sin: '0', cos: '1', tan: '0', sec: '1', csc: '∞', cot: '∞'}
-            };
-            
-            if (angulosComuns[angle] && angulosComuns[angle][func]) {
-                divPassos.innerHTML += `
-                    <p><strong>Exact value:</strong> $${angulosComuns[angle][func]}$</p>
-                `;
-            }
-            
-            divPassos.innerHTML += `</div>`; // Fecha Passo 2
+            divPassos.innerHTML += `
+                <div class="step">
+                    <p><strong>Step 3: Inequality Solution</strong></p>
+                    <p>$$${formatarNumeroInteiro(resultado)} ${formatarDesigualdade(simbolo)} y$$</p>
+                    <p>$$y ${simbolo === '>' ? '<' : simbolo === '<' ? '>' : formatarDesigualdade(simbolo)} ${formatarNumeroInteiro(resultado)}$$</p>
+                </div>
+            `;
         }
-        
+
     } catch (err) {
         divPassos.innerHTML = `<p style="color:red;">Error: ${err}</p>`;
     }
@@ -1728,12 +1791,6 @@ function encontrarRaizesCubicas(a, b, c, constante) {
     return raizes;
 }
 
-function mostrarSeção() {
-    const tipo = document.getElementById('tipoEquacao').value;
-    document.querySelectorAll('.secao').forEach(s => s.style.display = 'none');
-    if (tipo) document.getElementById(tipo).style.display = 'block';
-}
-
 // Inicializar quando a página carregar
 document.addEventListener('DOMContentLoaded', function() {
     // Adicionar placeholders com exemplos
@@ -1765,7 +1822,7 @@ let desenhando = false;
 let lastX = 0;
 let lastY = 0;
 
-// CORREÇÃO: Função para obter a posição correta do mouse no canvas
+// Função para obter a posição correta do mouse no canvas
 function obterPosicaoMouse(canvas, evt) {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
@@ -1776,7 +1833,7 @@ function obterPosicaoMouse(canvas, evt) {
     };
 }
 
-// CORREÇÃO: Função para obter a posição correta do touch no canvas
+// Função para obter a posição correta do touch no canvas
 function obterPosicaoTouch(canvas, touch) {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
@@ -1805,7 +1862,7 @@ function finalizarDesenho() {
     desenhando = false;
 }
 
-// Eventos do mouse CORRIGIDOS
+// Eventos do mouse
 canvas.addEventListener("mousedown", e => {
     const pos = obterPosicaoMouse(canvas, e);
     iniciarDesenho(pos.x, pos.y);
@@ -1819,7 +1876,7 @@ canvas.addEventListener("mousemove", e => {
 canvas.addEventListener("mouseup", finalizarDesenho);
 canvas.addEventListener("mouseout", finalizarDesenho);
 
-// Eventos touch CORRIGIDOS
+// Eventos touch
 canvas.addEventListener("touchstart", e => {
     e.preventDefault();
     const touch = e.touches[0];
@@ -2540,151 +2597,7 @@ Negation of quantifiers:<br>
 \\[ \\neg(\\exists x P(x)) \\equiv \\forall x \\neg P(x) \\]<br><br>
 
 <strong>Proof Methods:</strong><br>
-Direct proof, proof by contraposition, proof by contradiction, proof by induction`,
-
-    12: `<strong>Calculus — Differential:</strong><br>
-
-<strong>Limits:</strong><br>
-Intuitive and formal definition (ε-δ)<br>
-One-sided limits<br>
-Limits at infinity<br>
-Infinite limits<br>
-Fundamental limits:<br>
-\\[ \\lim_{x\\to 0} \\frac{\\sin x}{x} = 1 \\]<br>
-\\[ \\lim_{x\\to 0} \\frac{e^x - 1}{x} = 1 \\]<br>
-\\[ \\lim_{x\\to \\infty} \\left(1 + \\frac{1}{x}\\right)^x = e \\]<br><br>
-
-<strong>Continuity:</strong><br>
-A function is continuous at a point if:<br>
-1. \\( f(a) \\) exists<br>
-2. \\( \\lim_{x\\to a} f(x) \\) exists<br>
-3. \\( \\lim_{x\\to a} f(x) = f(a) \\)<br><br>
-
-<strong>Derivative:</strong><br>
-Definition as limit:<br>
-\\[ f'(x) = \\lim_{h\\to 0} \\frac{f(x+h) - f(x)}{h} \\]<br>
-Geometric interpretation: slope of tangent line<br>
-Physical interpretation: instantaneous rate of change<br><br>
-
-<strong>Differentiation Rules:</strong><br>
-Constant derivative: \\( (c)' = 0 \\)<br>
-Power rule: \\( (x^n)' = nx^{n-1} \\)<br>
-Sum rule: \\( (f + g)' = f' + g' \\)<br>
-Product rule: \\( (fg)' = f'g + fg' \\)<br>
-Quotient rule: \\( \\left(\\frac{f}{g}\\right)' = \\frac{f'g - fg'}{g^2} \\)<br>
-Chain rule: \\( (f(g(x)))' = f'(g(x))\\cdot g'(x) \\)<br><br>
-
-<strong>Derivatives of Elementary Functions:</strong><br>
-\\[ (\\sin x)' = \\cos x \\]<br>
-\\[ (\\cos x)' = -\\sin x \\]<br>
-\\[ (\\tan x)' = \\sec^2 x \\]<br>
-\\[ (e^x)' = e^x \\]<br>
-\\[ (a^x)' = a^x \\ln a \\]<br>
-\\[ (\\ln x)' = \\frac{1}{x} \\]<br>
-\\[ (\\log_a x)' = \\frac{1}{x\\ln a} \\]<br><br>
-
-<strong>Higher Order Derivatives:</strong><br>
-\\[ f''(x), f'''(x), f^{(n)}(x) \\]<br><br>
-
-<strong>Implicit Differentiation:</strong><br>
-Example: \\( x^2 + y^2 = 1 \\Rightarrow 2x + 2y\\frac{dy}{dx} = 0 \\Rightarrow \\frac{dy}{dx} = -\\frac{x}{y} \\)<br><br>
-
-<strong>Logarithmic Differentiation:</strong><br>
-For functions of type \\( f(x)^{g(x)} \\)<br><br>
-
-<strong>Applications of Derivative:</strong><br>
-Related rates<br>
-Maxima and minima<br>
-First derivative test<br>
-Second derivative test<br>
-Concavity and inflection points<br><br>
-
-<strong>Theorems of Differential Calculus:</strong><br>
-Rolle's Theorem<br>
-Mean Value Theorem<br>
-Cauchy's Mean Value Theorem<br><br>
-
-<strong>L'Hôpital's Rule:</strong><br>
-For indeterminate limits \\( \\frac{0}{0} \\) or \\( \\frac{\\infty}{\\infty} \\):<br>
-\\[ \\lim_{x\\to a} \\frac{f(x)}{g(x)} = \\lim_{x\\to a} \\frac{f'(x)}{g'(x)} \\]<br><br>
-
-<strong>Differential:</strong><br>
-\\[ dy = f'(x)dx \\]`,
-
-    13: `<strong>Calculus — Integral:</strong><br>
-
-<strong>Antiderivative:</strong><br>
-\\( F \\) is an antiderivative of \\( f \\) if \\( F'(x) = f(x) \\)<br>
-All antiderivatives differ by a constant<br><br>
-
-<strong>Indefinite Integral:</strong><br>
-\\[ \\int f(x)\\,dx = F(x) + C \\]<br>
-Properties:<br>
-\\[ \\int [f(x) + g(x)]\\,dx = \\int f(x)\\,dx + \\int g(x)\\,dx \\]<br>
-\\[ \\int kf(x)\\,dx = k\\int f(x)\\,dx \\]<br><br>
-
-<strong>Basic Integrals:</strong><br>
-\\[ \\int x^n\\,dx = \\frac{x^{n+1}}{n+1} + C \\quad (n \\neq -1) \\]<br>
-\\[ \\int \\frac{1}{x}\\,dx = \\ln|x| + C \\]<br>
-\\[ \\int e^x\\,dx = e^x + C \\]<br>
-\\[ \\int a^x\\,dx = \\frac{a^x}{\\ln a} + C \\]<br>
-\\[ \\int \\sin x\\,dx = -\\cos x + C \\]<br>
-\\[ \\int \\cos x\\,dx = \\sin x + C \\]<br>
-\\[ \\int \\sec^2 x\\,dx = \\tan x + C \\]<br>
-\\[ \\int \\csc^2 x\\,dx = -\\cot x + C \\]<br>
-\\[ \\int \\sec x\\tan x\\,dx = \\sec x + C \\]<br>
-\\[ \\int \\csc x\\cot x\\,dx = -\\csc x + C \\]<br>
-\\[ \\int \\frac{1}{\\sqrt{1-x^2}}\\,dx = \\arcsin x + C \\]<br>
-\\[ \\int \\frac{1}{1+x^2}\\,dx = \\arctan x + C \\]<br><br>
-
-<strong>Integration Methods:</strong><br>
-<strong>Simple Substitution:</strong><br>
-\\[ \\int f(g(x))g'(x)\\,dx = \\int f(u)\\,du \\quad (u = g(x)) \\]<br><br>
-
-<strong>Integration by Parts:</strong><br>
-\\[ \\int u\\,dv = uv - \\int v\\,du \\]<br>
-LIATE: order of preference for choosing u (Logarithmic, Inverse trigonometric, Algebraic, Trigonometric, Exponential)<br><br>
-
-<strong>Partial Fractions:</strong><br>
-To integrate rational functions \\( \\frac{P(x)}{Q(x)} \\)<br><br>
-
-<strong>Trigonometric Substitution:</strong><br>
-For integrals with \\( \\sqrt{a^2 - x^2} \\), \\( \\sqrt{a^2 + x^2} \\), \\( \\sqrt{x^2 - a^2} \\)<br><br>
-
-<strong>Definite Integral:</strong><br>
-\\[ \\int_a^b f(x)\\,dx = \\lim_{n\\to\\infty} \\sum_{i=1}^n f(x_i^*)\\Delta x \\]<br>
-Geometric interpretation: area under the curve<br><br>
-
-<strong>Properties of Definite Integral:</strong><br>
-\\[ \\int_a^b f(x)\\,dx = -\\int_b^a f(x)\\,dx \\]<br>
-\\[ \\int_a^a f(x)\\,dx = 0 \\]<br>
-\\[ \\int_a^b [f(x) + g(x)]\\,dx = \\int_a^b f(x)\\,dx + \\int_a^b g(x)\\,dx \\]<br>
-\\[ \\int_a^b kf(x)\\,dx = k\\int_a^b f(x)\\,dx \\]<br>
-\\[ \\int_a^b f(x)\\,dx = \\int_a^c f(x)\\,dx + \\int_c^b f(x)\\,dx \\]<br><br>
-
-<strong>Fundamental Theorem of Calculus:</strong><br>
-Part 1: \\( \\frac{d}{dx}\\int_a^x f(t)\\,dt = f(x) \\)<br>
-Part 2: \\( \\int_a^b f(x)\\,dx = F(b) - F(a) \\), where \\( F'(x) = f(x) \\)<br><br>
-
-<strong>Applications of Integral:</strong><br>
-Area between curves<br>
-Volume of solids of revolution (disk method, washer method, shell method)<br>
-Arc length<br>
-Surface area of revolution<br>
-Work<br>
-Center of mass<br><br>
-
-<strong>Improper Integrals:</strong><br>
-With infinite limit: \\( \\int_a^\\infty f(x)\\,dx = \\lim_{b\\to\\infty} \\int_a^b f(x)\\,dx \\)<br>
-With infinite discontinuity<br><br>
-
-<strong>Functions Defined by Integrals:</strong><br>
-Error function, gamma function, beta function<br><br>
-
-<strong>Differential Equations:</strong><br>
-Separable equations<br>
-First order linear equations<br>
-Exact equations`
+Direct proof, proof by contraposition, proof by contradiction, proof by induction`
 };
 
 function mostrarConteudo() {
@@ -2707,14 +2620,6 @@ document.addEventListener('DOMContentLoaded', function() {
         MathJax.startup.document.state(0);
         MathJax.typesetPromise();
     }
-});
-
-// ===== MENU LATERAL =====
-const toggleMenu = document.getElementById('toggleMenu');
-const sidebar = document.getElementById('sidebar');
-
-toggleMenu.addEventListener('click', () => {
-    sidebar.classList.toggle('active');
 });
 
 // ===== FAÍSCAS DA LÂMPADA =====
@@ -2748,3 +2653,538 @@ function criarFaiscas() {
         }, 400);
     }
 }
+
+// ===== DESMOS GRAPHING CALCULATOR =====
+let desmosCalculator = null;
+let isDesmosVisible = false;
+
+// Initialize Desmos calculator
+function initDesmos() {
+    if (!window.Desmos) {
+        console.error('Desmos library not loaded');
+        return;
+    }
+    
+    const elt = document.getElementById('desmos-calculator');
+    if (!elt) return;
+    
+    desmosCalculator = Desmos.GraphingCalculator(elt, {
+        keypad: true,
+        graphpaper: true,
+        expressions: true,
+        settingsMenu: true,
+        zoomButtons: true,
+        expressionsTopbar: true,
+        pointsOfInterest: true,
+        trace: true,
+        border: false,
+        colors: {
+            grid: '#ccc',
+            axes: '#000'
+        }
+    });
+    
+    // Set default view
+    desmosCalculator.setMathBounds({
+        left: -10,
+        right: 10,
+        bottom: -10,
+        top: 10
+    });
+}
+
+// Toggle Desmos container visibility
+function toggleDesmos() {
+    const desmosContainer = document.getElementById('desmosContainer');
+    isDesmosVisible = !isDesmosVisible;
+    
+    if (isDesmosVisible) {
+        desmosContainer.style.display = 'block';
+        setTimeout(() => {
+            desmosContainer.classList.add('visible');
+            // Initialize Desmos if not already initialized
+            if (!desmosCalculator) {
+                initDesmos();
+            }
+        }, 10);
+    } else {
+        desmosContainer.classList.remove('visible');
+        setTimeout(() => {
+            desmosContainer.style.display = 'none';
+        }, 400);
+    }
+}
+
+// Plot equation from current active tab
+function plotEquationFromCurrentTab() {
+    if (!desmosCalculator) return;
+    
+    const tipo = document.getElementById('tipoEquacao').value;
+    
+    switch(tipo) {
+        case 'linear':
+            plotLinearEquation();
+            break;
+        case 'quadratic':
+            plotQuadraticEquation();
+            break;
+        case 'cubic':
+            plotCubicEquation();
+            break;
+        case 'quartic':
+            plotQuarticEquation();
+            break;
+        case 'exponential':
+            plotExponentialEquation();
+            break;
+        case 'logarithmic':
+            plotLogarithmicEquation();
+            break;
+        case 'trigonometric':
+            plotTrigonometricEquation();
+            break;
+        default:
+            alert('Please select an equation type first.');
+    }
+}
+
+// Plot linear equation
+function plotLinearEquation() {
+    const a = obterValorMatematico('linearA');
+    const b = obterValorMatematico('linearB');
+    const c = obterValorMatematico('linearC');
+    const simbolo = document.getElementById('linearInequality').value;
+    
+    if (isNaN(a) || isNaN(b) || isNaN(c)) {
+        alert('Please enter valid coefficients first.');
+        return;
+    }
+    
+    // Clear previous expressions
+    desmosCalculator.setExpressions([]);
+    
+    // Plot the equation
+    if (simbolo === '=') {
+        // Plot as line
+        const expression = `${formatarNumeroInteiro(a)}x + ${formatarNumeroInteiro(b)} = ${formatarNumeroInteiro(c)}`;
+        desmosCalculator.setExpression({
+            id: 'graph1',
+            latex: `${formatarNumeroInteiro(a)}x + ${formatarNumeroInteiro(b)} = ${formatarNumeroInteiro(c)}`,
+            color: Desmos.Colors.BLUE
+        });
+    } else {
+        // Plot inequality region
+        const expression = `${formatarNumeroInteiro(a)}x + ${formatarNumeroInteiro(b)} ${simbolo} ${formatarNumeroInteiro(c)}`;
+        desmosCalculator.setExpression({
+            id: 'graph1',
+            latex: `${formatarNumeroInteiro(a)}x + ${formatarNumeroInteiro(b)} ${simbolo} ${formatarNumeroInteiro(c)}`,
+            color: Desmos.Colors.BLUE,
+            fill: true,
+            lines: false
+        });
+    }
+    
+    // Adjust view if needed
+    adjustViewForLinear(a, b, c);
+}
+
+// Adjust view for linear equation
+function adjustViewForLinear(a, b, c) {
+    if (a === 0) {
+        // Horizontal line
+        desmosCalculator.setMathBounds({
+            left: -10,
+            right: 10,
+            bottom: Math.min(-10, c - b - 5),
+            top: Math.max(10, c - b + 5)
+        });
+    } else {
+        const xIntercept = (c - b) / a;
+        desmosCalculator.setMathBounds({
+            left: Math.min(-10, xIntercept - 5),
+            right: Math.max(10, xIntercept + 5),
+            bottom: -10,
+            top: 10
+        });
+    }
+}
+
+// Plot quadratic equation
+function plotQuadraticEquation() {
+    const a = obterValorMatematico('quadraticA');
+    const b = obterValorMatematico('quadraticB');
+    const c = obterValorMatematico('quadraticC');
+    const d = obterValorMatematico('quadraticD');
+    const simbolo = document.getElementById('quadraticInequality').value;
+    
+    if (isNaN(a) || isNaN(b) || isNaN(c) || isNaN(d)) {
+        alert('Please enter valid coefficients first.');
+        return;
+    }
+    
+    const constante = c - d;
+    desmosCalculator.setExpressions([]);
+    
+    if (simbolo === '=') {
+        desmosCalculator.setExpression({
+            id: 'graph1',
+            latex: `y = ${formatarNumeroInteiro(a)}x^2 + ${formatarNumeroInteiro(b)}x + ${formatarNumeroInteiro(constante)}`,
+            color: Desmos.Colors.RED
+        });
+    } else {
+        desmosCalculator.setExpression({
+            id: 'graph1',
+            latex: `${formatarNumeroInteiro(a)}x^2 + ${formatarNumeroInteiro(b)}x + ${formatarNumeroInteiro(constante)} ${simbolo} 0`,
+            color: Desmos.Colors.RED,
+            fill: true
+        });
+    }
+    
+    // Find vertex and adjust view
+    if (a !== 0) {
+        const vertexX = -b / (2 * a);
+        const vertexY = a * vertexX * vertexX + b * vertexX + constante;
+        
+        desmosCalculator.setMathBounds({
+            left: vertexX - 5,
+            right: vertexX + 5,
+            bottom: vertexY - 5,
+            top: vertexY + 5
+        });
+    }
+}
+
+// Plot cubic equation
+function plotCubicEquation() {
+    const a = obterValorMatematico('cubicA');
+    const b = obterValorMatematico('cubicB');
+    const c = obterValorMatematico('cubicC');
+    const d = obterValorMatematico('cubicD');
+    const e = obterValorMatematico('cubicE');
+    
+    if (isNaN(a) || isNaN(b) || isNaN(c) || isNaN(d) || isNaN(e)) {
+        alert('Please enter valid coefficients first.');
+        return;
+    }
+    
+    const constante = d - e;
+    desmosCalculator.setExpressions([]);
+    
+    desmosCalculator.setExpression({
+        id: 'graph1',
+        latex: `y = ${formatarNumeroInteiro(a)}x^3 + ${formatarNumeroInteiro(b)}x^2 + ${formatarNumeroInteiro(c)}x + ${formatarNumeroInteiro(constante)}`,
+        color: Desmos.Colors.GREEN
+    });
+    
+    // Adjust view
+    desmosCalculator.setMathBounds({
+        left: -10,
+        right: 10,
+        bottom: -10,
+        top: 10
+    });
+}
+
+// Plot quartic equation
+function plotQuarticEquation() {
+    const a = obterValorMatematico('quarticA');
+    const b = obterValorMatematico('quarticB');
+    const c = obterValorMatematico('quarticC');
+    const d = obterValorMatematico('quarticD');
+    const e = obterValorMatematico('quarticE');
+    const f_val = obterValorMatematico('quarticF');
+    
+    if (isNaN(a) || isNaN(b) || isNaN(c) || isNaN(d) || isNaN(e) || isNaN(f_val)) {
+        alert('Please enter valid coefficients first.');
+        return;
+    }
+    
+    const constante = e - f_val;
+    desmosCalculator.setExpressions([]);
+    
+    desmosCalculator.setExpression({
+        id: 'graph1',
+        latex: `y = ${formatarNumeroInteiro(a)}x^4 + ${formatarNumeroInteiro(b)}x^3 + ${formatarNumeroInteiro(c)}x^2 + ${formatarNumeroInteiro(d)}x + ${formatarNumeroInteiro(constante)}`,
+        color: Desmos.Colors.PURPLE
+    });
+    
+    // Adjust view
+    desmosCalculator.setMathBounds({
+        left: -10,
+        right: 10,
+        bottom: -10,
+        top: 10
+    });
+}
+
+// Plot exponential equation
+function plotExponentialEquation() {
+    const Q = obterValorMatematico('expQ');
+    const Q0 = obterValorMatematico('expQ0');
+    const a = obterValorMatematico('expA');
+    const t = obterValorMatematico('expT');
+    const simbolo = document.getElementById('expInequality').value;
+    
+    // Determine which variable is unknown
+    if (isNaN(Q)) {
+        // Q is unknown, plot Q as function of t
+        desmosCalculator.setExpressions([]);
+        
+        if (simbolo === '=') {
+            desmosCalculator.setExpression({
+                id: 'graph1',
+                latex: `y = ${formatarNumeroInteiro(Q0)} \\cdot ${formatarNumeroInteiro(a)}^x`,
+                color: Desmos.Colors.ORANGE
+            });
+        } else {
+            desmosCalculator.setExpression({
+                id: 'graph1',
+                latex: `y ${simbolo} ${formatarNumeroInteiro(Q0)} \\cdot ${formatarNumeroInteiro(a)}^x`,
+                color: Desmos.Colors.ORANGE,
+                fill: true
+            });
+        }
+        
+        // Highlight the point at x = t
+        const QValue = Q0 * Math.pow(a, t);
+        desmosCalculator.setExpression({
+            id: 'point1',
+            latex: `(${formatarNumeroInteiro(t)}, ${formatarNumeroInteiro(QValue)})`,
+            color: Desmos.Colors.RED,
+            pointStyle: Desmos.Styles.CROSS
+        });
+    }
+    // Add similar logic for other unknown variables...
+    
+    desmosCalculator.setMathBounds({
+        left: Math.max(-10, t - 5),
+        right: t + 5,
+        bottom: 0,
+        top: Math.max(10, Q0 * Math.pow(a, t) * 1.5)
+    });
+}
+
+// Plot logarithmic equation
+function plotLogarithmicEquation() {
+    const base = obterValorMatematico('logBase');
+    const argument = obterValorMatematico('logArgument');
+    const result = obterValorMatematico('logResult');
+    const simbolo = document.getElementById('logInequality').value;
+    
+    if (isNaN(base) || isNaN(argument) || isNaN(result)) {
+        alert('Please enter valid values first.');
+        return;
+    }
+    
+    desmosCalculator.setExpressions([]);
+    
+    if (simbolo === '=') {
+        // Plot logarithmic function
+        desmosCalculator.setExpression({
+            id: 'graph1',
+            latex: `y = \\log_{${formatarNumeroInteiro(base)}}{x}`,
+            color: Desmos.Colors.BLUE,
+            restrictedDomain: true,
+            domain: { min: 0.001 }
+        });
+        
+        // Plot horizontal line at y = result
+        desmosCalculator.setExpression({
+            id: 'graph2',
+            latex: `y = ${formatarNumeroInteiro(result)}`,
+            color: Desmos.Colors.RED
+        });
+        
+        // Mark intersection point
+        const xValue = Math.pow(base, result);
+        desmosCalculator.setExpression({
+            id: 'point1',
+            latex: `(${formatarNumeroInteiro(xValue)}, ${formatarNumeroInteiro(result)})`,
+            color: Desmos.Colors.GREEN,
+            pointStyle: Desmos.Styles.CROSS
+        });
+    }
+    
+    desmosCalculator.setMathBounds({
+        left: 0,
+        right: Math.max(10, Math.pow(base, result) * 1.5),
+        bottom: Math.min(-5, result - 3),
+        top: Math.max(5, result + 3)
+    });
+}
+
+// Plot trigonometric equation
+function plotTrigonometricEquation() {
+    const func = document.getElementById('trigFunction').value;
+    const angle = obterValorMatematico('trigAngle');
+    const value = obterValorMatematico('trigValue');
+    const simbolo = document.getElementById('trigInequality').value;
+    
+    desmosCalculator.setExpressions([]);
+    
+    if (!isNaN(angle) && isNaN(value)) {
+        // Angle is known, value is unknown
+        const angleRad = paraRadianos(angle);
+        let funcValue;
+        
+        switch(func) {
+            case 'sin': funcValue = Math.sin(angleRad); break;
+            case 'cos': funcValue = Math.cos(angleRad); break;
+            case 'tan': funcValue = Math.tan(angleRad); break;
+            case 'sec': funcValue = 1/Math.cos(angleRad); break;
+            case 'csc': funcValue = 1/Math.sin(angleRad); break;
+            case 'cot': funcValue = 1/Math.tan(angleRad); break;
+        }
+        
+        // Plot trigonometric function
+        desmosCalculator.setExpression({
+            id: 'graph1',
+            latex: `y = \\${func}(x)`,
+            color: Desmos.Colors.BLUE
+        });
+        
+        // Plot vertical line at x = angle
+        desmosCalculator.setExpression({
+            id: 'graph2',
+            latex: `x = ${formatarNumeroInteiro(angle)}`,
+            color: Desmos.Colors.RED
+        });
+        
+        // Mark the point
+        desmosCalculator.setExpression({
+            id: 'point1',
+            latex: `(${formatarNumeroInteiro(angle)}, ${formatarNumeroInteiro(funcValue)})`,
+            color: Desmos.Colors.GREEN,
+            pointStyle: Desmos.Styles.CROSS
+        });
+    }
+    
+    desmosCalculator.setMathBounds({
+        left: Math.max(-360, angle - 180),
+        right: Math.min(360, angle + 180),
+        bottom: -2,
+        top: 2
+    });
+}
+
+// Plot custom equation
+function plotCustomEquation() {
+    const equationInput = document.getElementById('desmosEquation').value;
+    
+    if (!equationInput.trim()) {
+        alert('Please enter an equation.');
+        return;
+    }
+    
+    if (!desmosCalculator) {
+        alert('Desmos calculator not initialized.');
+        return;
+    }
+    
+    // Clear previous expressions except maybe keep some
+    const expressions = desmosCalculator.getExpressions();
+    const newExpressions = expressions.filter(exp => exp.id && exp.id.startsWith('custom-'));
+    
+    // Generate new ID
+    const newId = 'custom-' + Date.now();
+    
+    // Add new expression
+    desmosCalculator.setExpression({
+        id: newId,
+        latex: equationInput,
+        color: getRandomColor()
+    });
+    
+    // Clear input
+    document.getElementById('desmosEquation').value = '';
+}
+
+// Get random color for graphs
+function getRandomColor() {
+    const colors = [
+        Desmos.Colors.BLUE,
+        Desmos.Colors.RED,
+        Desmos.Colors.GREEN,
+        Desmos.Colors.PURPLE,
+        Desmos.Colors.ORANGE,
+        Desmos.Colors.BLACK
+    ];
+    return colors[Math.floor(Math.random() * colors.length)];
+}
+
+// Clear Desmos graph
+function clearDesmosGraph() {
+    if (desmosCalculator) {
+        desmosCalculator.setExpressions([]);
+    }
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Add event listener for Desmos toggle button
+    const toggleDesmosBtn = document.getElementById('toggleDesmos');
+    if (toggleDesmosBtn) {
+        toggleDesmosBtn.addEventListener('click', toggleDesmos);
+    }
+    
+    // Add event listener for close Desmos button
+    const closeDesmosBtn = document.getElementById('closeDesmos');
+    if (closeDesmosBtn) {
+        closeDesmosBtn.addEventListener('click', toggleDesmos);
+    }
+    
+    // Initialize Desmos when needed
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                const desmosContainer = document.getElementById('desmosContainer');
+                if (desmosContainer && desmosContainer.style.display !== 'none' && !desmosCalculator) {
+                    initDesmos();
+                }
+            }
+        });
+    });
+    
+    const desmosContainer = document.getElementById('desmosContainer');
+    if (desmosContainer) {
+        observer.observe(desmosContainer, { attributes: true });
+    }
+});
+
+// Update the lousa button event listener to also handle Desmos
+document.getElementById("abrirLousa").addEventListener("click", () => {
+    const lousaContainer = document.getElementById("lousaContainer");
+    lousaContainer.style.display = "block";
+    setTimeout(() => lousaContainer.classList.add("visivel"), 10);
+    document.getElementById("abrirLousa").style.display = "none";
+    document.getElementById("fecharLousa").style.display = "inline-block";
+    
+    // Also show Desmos if it was visible before
+    const desmosContainer = document.getElementById("desmosContainer");
+    if (desmosContainer && desmosContainer.classList.contains("visible")) {
+        desmosContainer.style.display = "block";
+        desmosContainer.classList.add("visible");
+    }
+});
+
+document.getElementById("fecharLousa").addEventListener("click", () => {
+    const lousaContainer = document.getElementById("lousaContainer");
+    lousaContainer.classList.remove("visivel");
+    setTimeout(() => {
+        lousaContainer.style.display = "none";
+        document.getElementById("abrirLousa").style.display = "inline-block";
+        document.getElementById("fecharLousa").style.display = "none";
+        
+        // Also hide Desmos
+        const desmosContainer = document.getElementById("desmosContainer");
+        if (desmosContainer) {
+            desmosContainer.classList.remove("visible");
+            setTimeout(() => {
+                desmosContainer.style.display = "none";
+            }, 400);
+            isDesmosVisible = false;
+        }
+    }, 400);
+
+    
+});
