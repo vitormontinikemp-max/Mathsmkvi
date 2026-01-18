@@ -490,14 +490,15 @@ function resolverInequacaoQuadratica(a, b, c, d, simbolo) {
                 if (Math.abs(raizMenor - raizMaior) < 1e-10) {
                     return `x = ${formatarNumeroInteiro(raizMenor)}`;
                 } else {
-                    return `x = ${formatarNumeroInteiro(raizMenor)} \\text{ or } x = ${formatarNumeroInteiro(raizMaior)}`;
+                    return `x = ${formatarNumeroInteiro(raizMenor)} \\; \\text{or} \\; x = ${formatarNumeroInteiro(raizMaior)}`;
 
                 }
             case '>':
                 if (Math.abs(raizMenor - raizMaior) < 1e-10) {
                     return `x ≠ ${formatarNumeroInteiro(raizMenor)}`;
                 } else {
-                    return `x < ${formatarNumeroInteiro(raizMenor)} or x > ${formatarNumeroInteiro(raizMaior)}`;
+                    return `x < ${formatarNumeroInteiro(raizMenor)} \\; \\lor \\; x > ${formatarNumeroInteiro(raizMaior)}`;
+
                 }
             case '<':
                 if (Math.abs(raizMenor - raizMaior) < 1e-10) {
@@ -509,7 +510,8 @@ function resolverInequacaoQuadratica(a, b, c, d, simbolo) {
                 if (Math.abs(raizMenor - raizMaior) < 1e-10) {
                     return `∀ x ∈ ℝ`;
                 } else {
-                    return `x ≤ ${formatarNumeroInteiro(raizMenor)} or x ≥ ${formatarNumeroInteiro(raizMaior)}`;
+                    return `x \\le ${formatarNumeroInteiro(raizMenor)} \\; \\lor \\; x \\ge ${formatarNumeroInteiro(raizMaior)}`;
+
                 }
             case '<=':
                 if (Math.abs(raizMenor - raizMaior) < 1e-10) {
@@ -525,7 +527,7 @@ function resolverInequacaoQuadratica(a, b, c, d, simbolo) {
                 if (Math.abs(raizMenor - raizMaior) < 1e-10) {
                     return `x = ${formatarNumeroInteiro(raizMenor)}`;
                 } else {
-                    return `x = ${formatarNumeroInteiro(raizMenor)} or x = ${formatarNumeroInteiro(raizMaior)}`;
+                    return `x = ${formatarNumeroInteiro(raizMenor)}  or  x = ${formatarNumeroInteiro(raizMaior)}`;
                 }
             case '>':
                 if (Math.abs(raizMenor - raizMaior) < 1e-10) {
@@ -537,7 +539,7 @@ function resolverInequacaoQuadratica(a, b, c, d, simbolo) {
                 if (Math.abs(raizMenor - raizMaior) < 1e-10) {
                     return `x ≠ ${formatarNumeroInteiro(raizMenor)}`;
                 } else {
-                    return `x < ${formatarNumeroInteiro(raizMenor)} or x > ${formatarNumeroInteiro(raizMaior)}`;
+                    return `x < ${formatarNumeroInteiro(raizMenor)}  or  x > ${formatarNumeroInteiro(raizMaior)}`;
                 }
             case '>=':
                 if (Math.abs(raizMenor - raizMaior) < 1e-10) {
@@ -549,7 +551,7 @@ function resolverInequacaoQuadratica(a, b, c, d, simbolo) {
                 if (Math.abs(raizMenor - raizMaior) < 1e-10) {
                     return `∀ x ∈ ℝ`;
                 } else {
-                    return `x ≤ ${formatarNumeroInteiro(raizMenor)} or x ≥ ${formatarNumeroInteiro(raizMaior)}`;
+                    return `x ≤ ${formatarNumeroInteiro(raizMenor)}  or  x ≥ ${formatarNumeroInteiro(raizMaior)}`;
                 }
         }
     }
@@ -3189,4 +3191,5 @@ document.getElementById("fecharLousa").addEventListener("click", () => {
 
     
 });
+
 
