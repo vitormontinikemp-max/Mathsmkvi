@@ -27,31 +27,34 @@
 
 
 <body>
-    <div id="contt">
-       <button id="toggleTheme">💡</button>
-    </div>
+    
        
     
        <button id="openCalc" class="open-calc">🧮</button> 
        <button class="abrir-lousa-container" id="abrirLousa">🖌️</button> 
        <button id="fecharLousa">❌</button> 
-    
+       
     
     
     <!-- ===== MAIN CONTAINER ===== -->
     <div class="container">
+        
+        <div id="contt">
+           <button id="toggleTheme">💡</button>
+        </div>
+        
         <h1 id="ms">Math Solver</h1>
         <h4>Choose the equation type:</h4>
-
+        
         <select id="tipoEquacao" onchange="mostrarSeção()">
             <option value="">Select</option>
-            <option value="linear">Linear equation</option>
-            <option value="quadratic">Quadratic equation</option>
+            <option value="linear">Linear equation/inequality</option>
+            <option value="quadratic">Quadratic equation/inequality</option>
             <option value="cubic">Cubic equation</option>
             <option value="quartic">Quartic equation</option>
-            <option value="exponential">Exponential equation</option>
-            <option value="logarithmic">Logarithmic equation</option>
-            <option value="trigonometric">Trigonometric equation</option>
+            <option value="exponential">Exponential equation/inequality</option>
+            <option value="logarithmic">Logarithmic equation/inequality</option>
+            <option value="trigonometric">Trigonometric equation/inequality</option>
         </select>
 
         <!-- ===== LINEAR EQUATION ===== -->
@@ -70,7 +73,15 @@
                     <input type="text" id="linearB" placeholder="ex: 1, -4" step="any">
                 </div>
 
-                <div class="igualdade">=</div>
+                <div class="inequality-select">
+                    <select id="linearInequality">
+                        <option value="=">=</option>
+                        <option value=">">&gt;</option>
+                        <option value="<">&lt;</option>
+                        <option value=">=">&gt;=</option>
+                        <option value="<=">&lt;=</option>
+                    </select>
+                </div>
 
                 <div class="coeficiente-input">
                     <label for="linearC">c:</label>
@@ -113,7 +124,15 @@
                     <input type="text" id="quadraticC" placeholder="ex: 2, -6" step="any">
                 </div>
 
-                <div class="igualdade">=</div>
+                <div class="inequality-select">
+                    <select id="quadraticInequality">
+                        <option value="=">=</option>
+                        <option value=">">&gt;</option>
+                        <option value="<">&lt;</option>
+                        <option value=">=">&gt;=</option>
+                        <option value="<=">&lt;=</option>
+                    </select>
+                </div>
 
                 <div class="coeficiente-input">
                     <label for="quadraticD">d:</label>
@@ -248,7 +267,15 @@
                     <input type="text" id="expQ" placeholder="ex: 8, 16" step="any">
                 </div>
 
-                <div class="igualdade">=</div>
+                <div class="inequality-select">
+                    <select id="expInequality">
+                        <option value="=">=</option>
+                        <option value=">">&gt;</option>
+                        <option value="<">&lt;</option>
+                        <option value=">=">&gt;=</option>
+                        <option value="<=">&lt;=</option>
+                    </select>
+                </div>
 
                 <div class="coeficiente-input">
                     <label for="expQ0">Q₀:</label>
@@ -296,7 +323,15 @@
                     <label for="logArgument">)</label>
                 </div>
 
-                <div class="igualdade">=</div>
+                <div class="inequality-select">
+                    <select id="logInequality">
+                        <option value="=">=</option>
+                        <option value=">">&gt;</option>
+                        <option value="<">&lt;</option>
+                        <option value=">=">&gt;=</option>
+                        <option value="<=">&lt;=</option>
+                    </select>
+                </div>
 
                 <div class="coeficiente-input">
                     <label for="logResult">result:</label>
@@ -339,7 +374,15 @@
                     <label for="trigAngle">)</label>
                 </div>
 
-                <div class="igualdade">=</div>
+                <div class="inequality-select">
+                    <select id="trigInequality">
+                        <option value="=">=</option>
+                        <option value=">">&gt;</option>
+                        <option value="<">&lt;</option>
+                        <option value=">=">&gt;=</option>
+                        <option value="<=">&lt;=</option>
+                    </select>
+                </div>
 
                 <div class="coeficiente-input">
                     <label for="trigValue">value:</label>
@@ -359,6 +402,7 @@
 
             <div id="trigonometricSteps"></div>
         </div>
+        <button id="toggleDesmos">Graphing Calculator 📈</button>
     </div>
 
     <!-- ===== DIGITAL BLACKBOARD ===== -->
@@ -369,6 +413,23 @@
             <button id="pencil">Pencil ✏️</button>
             <button id="eraser">Eraser 🧽</button>
             <button id="clear">Clear All 🧼</button>
+            
+        </div>
+    </div>
+
+    <!-- ===== DESMOS GRAPHING CALCULATOR ===== -->
+    <div class="desmos-container" id="desmosContainer" style="display: none;">
+        <div class="desmos-header">
+            <h3>Graphing Calculator</h3>
+            
+            <button id="closeDesmos">❌</button>
+        </div>
+        <div id="desmos-calculator" style="width: 100%; height: 500px;"></div>
+        <div class="desmos-controls">
+            <button onclick="plotEquationFromCurrentTab()">Plot Current Equation</button>
+            <button onclick="clearDesmosGraph()">Clear Graph</button>
+            <input type="text" id="desmosEquation" placeholder="Enter equation (e.g., y = x^2)">
+            <button onclick="plotCustomEquation()">Plot</button>
         </div>
     </div>
 
@@ -463,19 +524,10 @@
 
     <script id="MathJax-script" async
         src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+    <script 
+    src="https://www.desmos.com/api/v1.6/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
+    <script 
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 </body>
 
 </html>
-
-
-
-
-
-
-
-
-
-
-
