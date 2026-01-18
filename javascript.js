@@ -490,7 +490,8 @@ function resolverInequacaoQuadratica(a, b, c, d, simbolo) {
                 if (Math.abs(raizMenor - raizMaior) < 1e-10) {
                     return `x = ${formatarNumeroInteiro(raizMenor)}`;
                 } else {
-                    return `x = ${formatarNumeroInteiro(raizMenor)} or x = ${formatarNumeroInteiro(raizMaior)}`;
+                    return `x = ${formatarNumeroInteiro(raizMenor)} \\text{ or } x = ${formatarNumeroInteiro(raizMaior)}`;
+
                 }
             case '>':
                 if (Math.abs(raizMenor - raizMaior) < 1e-10) {
@@ -3188,3 +3189,4 @@ document.getElementById("fecharLousa").addEventListener("click", () => {
 
     
 });
+
