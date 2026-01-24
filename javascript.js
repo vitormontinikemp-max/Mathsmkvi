@@ -5,10 +5,7 @@ function mostrarSeção() {
     if (tipo) document.getElementById(tipo).style.display = 'block';
 }
 
-// ===== MODO ESCURO =====
-document.getElementById("toggleTheme").addEventListener("click", function () {
-    document.body.classList.toggle("dark-mode");
-});
+
 
 // Solucionador de Equações Avançado com MathJax
 
@@ -1805,114 +1802,271 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// ===== LOUSA =====
+// ===== LOUSA DIGITAL MELHORADA =====
 const canvas = document.getElementById("lousa");
 const ctx = canvas.getContext("2d");
 
-function ajustarCanvas() {
-    canvas.width = window.innerWidth * 0.45;
-    canvas.height = window.innerHeight * 0.7;
+// Configurações iniciais
+let config = {
+    drawing: false,
+    lastX: 0,
+    lastY: 0,
+    currentColor: "#000000",
+    brushSize: 3,
+    currentTool: "pencil",
+    zoomLevel: 1,
+    scaleX: 1,
+    scaleY: 1,
+    offsetX: 0,
+    offsetY: 0
+};
+
+// Elementos da UI
+const colorPicker = document.getElementById("colorPicker");
+const colorPreview = document.getElementById("colorPreview");
+const brushSizeSlider = document.getElementById("brushSize");
+const brushSizeValue = document.getElementById("brushSizeValue");
+const colorWheel = document.getElementById("colorWheel");
+const wheelColorPreview = document.getElementById("wheelColorPreview");
+const zoomInBtn = document.getElementById("zoomIn");
+const zoomOutBtn = document.getElementById("zoomOut");
+const resetZoomBtn = document.getElementById("resetZoom");
+
+// Brush preview
+const brushPreview = document.createElement("div");
+brushPreview.className = "brush-preview";
+document.body.appendChild(brushPreview);
+
+// Inicializar canvas
+function initCanvas() {
+    canvas.width = Math.min(window.innerWidth * 0.85, 1200);
+    canvas.height = Math.min(window.innerHeight * 0.85, 600);
+    clearCanvas();
+    updateCanvasStyle();
 }
-ajustarCanvas();
-window.addEventListener('resize', ajustarCanvas);
 
-ctx.lineCap = "round";
-ctx.lineJoin = "round";
-ctx.lineWidth = 1;
-ctx.strokeStyle = "black";
+function updateCanvasStyle() {
+    canvas.style.transform = `scale(${config.zoomLevel})`;
+    canvas.style.transformOrigin = 'center';
+}
 
-let desenhando = false;
-let lastX = 0;
-let lastY = 0;
+// Limpar canvas
+function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
 
-// Função para obter a posição correta do mouse no canvas
-function obterPosicaoMouse(canvas, evt) {
+// Atualizar configurações do pincel
+function updateBrush() {
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.lineWidth = config.brushSize;
+    ctx.strokeStyle = config.currentColor;
+    
+    colorPreview.style.backgroundColor = config.currentColor;
+    wheelColorPreview.style.backgroundColor = config.currentColor;
+    brushSizeValue.textContent = config.brushSize;
+}
+
+// Função para obter posição corrigida
+function getCanvasPosition(x, y) {
     const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
     return {
-        x: (evt.clientX - rect.left) * scaleX,
-        y: (evt.clientY - rect.top) * scaleY
+        x: (x - rect.left) * (canvas.width / rect.width),
+        y: (y - rect.top) * (canvas.height / rect.height)
     };
 }
 
-// Função para obter a posição correta do touch no canvas
-function obterPosicaoTouch(canvas, touch) {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    return {
-        x: (touch.clientX - rect.left) * scaleX,
-        y: (touch.clientY - rect.top) * scaleY
-    };
+// Funções de desenho
+function startDrawing(x, y) {
+    config.drawing = true;
+    [config.lastX, config.lastY] = [x, y];
+    
+    if (config.currentTool === 'pencil') {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+    }
 }
 
-function iniciarDesenho(x, y) {
-    desenhando = true;
-    [lastX, lastY] = [x, y];
-}
-
-function desenharLinha(x, y) {
-    if (!desenhando) return;
+function draw(x, y) {
+    if (!config.drawing) return;
+    
+    ctx.lineWidth = config.brushSize;
+    ctx.strokeStyle = config.currentTool === 'eraser' ? '#ffffff' : config.currentColor;
+    
     ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
+    ctx.moveTo(config.lastX, config.lastY);
     ctx.lineTo(x, y);
     ctx.stroke();
-    [lastX, lastY] = [x, y];
+    
+    [config.lastX, config.lastY] = [x, y];
 }
 
-function finalizarDesenho() {
-    desenhando = false;
+function stopDrawing() {
+    config.drawing = false;
+    ctx.beginPath();
+}
+
+// Função para atualizar preview do brush
+function updateBrushPreview(x, y) {
+    if (!config.drawing) {
+        brushPreview.style.display = 'block';
+        brushPreview.style.width = `${config.brushSize}px`;
+        brushPreview.style.height = `${config.brushSize}px`;
+        brushPreview.style.background = config.currentTool === 'eraser' ? '#ffffff' : config.currentColor;
+        brushPreview.style.border = config.currentTool === 'eraser' ? '1px solid #ccc' : '1px solid rgba(0,0,0,0.2)';
+        brushPreview.style.left = `${x}px`;
+        brushPreview.style.top = `${y}px`;
+    } else {
+        brushPreview.style.display = 'none';
+    }
 }
 
 // Eventos do mouse
 canvas.addEventListener("mousedown", e => {
-    const pos = obterPosicaoMouse(canvas, e);
-    iniciarDesenho(pos.x, pos.y);
+    const pos = getCanvasPosition(e.clientX, e.clientY);
+    startDrawing(pos.x, pos.y);
 });
 
 canvas.addEventListener("mousemove", e => {
-    const pos = obterPosicaoMouse(canvas, e);
-    desenharLinha(pos.x, pos.y);
+    const pos = getCanvasPosition(e.clientX, e.clientY);
+    updateBrushPreview(e.clientX, e.clientY);
+    
+    if (config.drawing) {
+        draw(pos.x, pos.y);
+    }
 });
 
-canvas.addEventListener("mouseup", finalizarDesenho);
-canvas.addEventListener("mouseout", finalizarDesenho);
+canvas.addEventListener("mouseup", stopDrawing);
+canvas.addEventListener("mouseout", () => {
+    brushPreview.style.display = 'none';
+    stopDrawing();
+});
 
 // Eventos touch
 canvas.addEventListener("touchstart", e => {
     e.preventDefault();
     const touch = e.touches[0];
-    const pos = obterPosicaoTouch(canvas, touch);
-    iniciarDesenho(pos.x, pos.y);
+    const pos = getCanvasPosition(touch.clientX, touch.clientY);
+    startDrawing(pos.x, pos.y);
 });
 
 canvas.addEventListener("touchmove", e => {
     e.preventDefault();
     const touch = e.touches[0];
-    const pos = obterPosicaoTouch(canvas, touch);
-    desenharLinha(pos.x, pos.y);
+    const pos = getCanvasPosition(touch.clientX, touch.clientY);
+    
+    if (config.drawing) {
+        draw(pos.x, pos.y);
+    }
 });
 
 canvas.addEventListener("touchend", e => {
     e.preventDefault();
-    finalizarDesenho();
+    stopDrawing();
 });
 
-// Ferramentas da lousa
+// Eventos da roda de cores
+colorWheel.addEventListener("click", e => {
+    const rect = colorWheel.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Cria um canvas temporário para extrair a cor
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCanvas.width = rect.width;
+    tempCanvas.height = rect.height;
+    
+    // Desenha o gradiente cônico
+    const gradient = tempCtx.createConicGradient(0, rect.width/2, rect.height/2);
+    gradient.addColorStop(0, '#ff0000');
+    gradient.addColorStop(1/6, '#ffff00');
+    gradient.addColorStop(2/6, '#00ff00');
+    gradient.addColorStop(3/6, '#00ffff');
+    gradient.addColorStop(4/6, '#0000ff');
+    gradient.addColorStop(5/6, '#ff00ff');
+    gradient.addColorStop(1, '#ff0000');
+    
+    tempCtx.fillStyle = gradient;
+    tempCtx.fillRect(0, 0, rect.width, rect.height);
+    
+    // Pega a cor do pixel clicado
+    const pixel = tempCtx.getImageData(x, y, 1, 1).data;
+    const color = `rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]})`;
+    
+    config.currentColor = rgbToHex(pixel[0], pixel[1], pixel[2]);
+    updateBrush();
+});
+
+// Função auxiliar para converter RGB para HEX
+function rgbToHex(r, g, b) {
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+// Event listeners para ferramentas
 document.getElementById("clear").addEventListener("click", () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (confirm("Are you sure you want to clear the canvas?")) {
+        clearCanvas();
+    }
 });
 
 document.getElementById("pencil").addEventListener("click", () => {
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 1;
+    config.currentTool = "pencil";
+    document.querySelectorAll(".tool-btn").forEach(btn => btn.classList.remove("active"));
+    document.getElementById("pencil").classList.add("active");
+    updateBrush();
 });
 
 document.getElementById("eraser").addEventListener("click", () => {
-    ctx.strokeStyle = "white";
-    ctx.lineWidth = 10;
+    config.currentTool = "eraser";
+    document.querySelectorAll(".tool-btn").forEach(btn => btn.classList.remove("active"));
+    document.getElementById("eraser").classList.add("active");
+    updateBrush();
 });
+
+// Event listeners para controles
+colorPicker.addEventListener("input", e => {
+    config.currentColor = e.target.value;
+    updateBrush();
+});
+
+brushSizeSlider.addEventListener("input", e => {
+    config.brushSize = parseInt(e.target.value);
+    updateBrush();
+});
+
+// Zoom controls - Versão mínima e direta
+zoomInBtn.addEventListener("click", () => {
+    
+    if (config.zoomLevel >= 1.2) return;
+    
+    config.zoomLevel = Math.min(config.zoomLevel + 0.1, 3);
+    updateCanvasStyle();
+});
+
+zoomOutBtn.addEventListener("click", () => {
+    
+    if (config.zoomLevel <= 0.5) return;
+    
+    config.zoomLevel = Math.max(config.zoomLevel - 0.1, 0.5);
+    updateCanvasStyle();
+});
+
+resetZoomBtn.addEventListener("click", () => {
+    config.zoomLevel = 1;
+    updateCanvasStyle();
+});
+
+// Resize canvas on window resize
+window.addEventListener('resize', initCanvas);
+
+// Inicializar
+initCanvas();
+updateBrush();
 
 // ===== ABRIR E FECHAR LOUSA =====
 const btnAbrir = document.getElementById("abrirLousa");
@@ -1920,23 +2074,29 @@ const btnFechar = document.getElementById("fecharLousa");
 const lousaContainer = document.getElementById("lousaContainer");
 
 // Inicialmente o botão "fechar" fica escondido
-btnFechar.style.display = "none";
+if (btnFechar) btnFechar.style.display = "none";
 
-btnAbrir.addEventListener("click", () => {
-    lousaContainer.style.display = "block";
-    setTimeout(() => lousaContainer.classList.add("visivel"), 10);
-    btnAbrir.style.display = "none";
-    btnFechar.style.display = "inline-block";
-});
+if (btnAbrir) {
+    btnAbrir.addEventListener("click", () => {
+        lousaContainer.style.display = "block";
+        setTimeout(() => lousaContainer.classList.add("visivel"), 10);
+        if (btnAbrir) btnAbrir.style.display = "none";
+        if (btnFechar) btnFechar.style.display = "inline-block";
+        // Re-inicializar canvas para ajustar tamanho
+        setTimeout(initCanvas, 50);
+    });
+}
 
-btnFechar.addEventListener("click", () => {
-    lousaContainer.classList.remove("visivel");
-    setTimeout(() => {
-        lousaContainer.style.display = "none";
-        btnAbrir.style.display = "inline-block";
-        btnFechar.style.display = "none";
-    }, 400);
-});
+if (btnFechar) {
+    btnFechar.addEventListener("click", () => {
+        lousaContainer.classList.remove("visivel");
+        setTimeout(() => {
+            lousaContainer.style.display = "none";
+            if (btnAbrir) btnAbrir.style.display = "inline-block";
+            if (btnFechar) btnFechar.style.display = "none";
+        }, 400);
+    });
+}
 
 // ===== CALCULADORA =====
 const calcModal = document.getElementById('calcModal');
@@ -2057,7 +2217,7 @@ window.calcBackspace = calcBackspace;
 window.calcSqrt = calcSqrt;
 window.calcCalculate = calcCalculate;
 
-// ===== CONTEÚDOS DE MATEMÁTICA EXPANDIDOS =====
+// ===== CONTEÚDOS DE MATEMÁTICA  =====
 const conteudos = {
     1: `<strong>Numbers and Algebraic Expressions:</strong><br>
 <strong>Real Numbers:</strong><br>
@@ -2625,37 +2785,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// ===== FAÍSCAS DA LÂMPADA =====
-const toggleTheme = document.getElementById("toggleTheme");
-const sparksBox = document.getElementById("sparks");
 
-toggleTheme.addEventListener("click", () => {
-    criarFaiscas();
-});
-
-function criarFaiscas() {
-    for (let i = 0; i < 8; i++) {
-        let spark = document.createElement("div");
-        spark.classList.add("spark");
-
-        // posição inicial (meio das faíscas)
-        spark.style.left = "50%";
-        spark.style.top = "20%";
-
-        // direção aleatória
-        const angulo = Math.random() * Math.PI * 2;
-        const distancia = 30 + Math.random() * 40;
-
-        spark.style.setProperty("--x", `${Math.cos(angulo) * distancia}px`);
-        spark.style.setProperty("--y", `${Math.sin(angulo) * distancia}px`);
-
-        sparksBox.appendChild(spark);
-
-        setTimeout(() => {
-            spark.remove();
-        }, 400);
-    }
-}
 
 // ===== DESMOS GRAPHING CALCULATOR =====
 let desmosCalculator = null;
@@ -2672,20 +2802,16 @@ function initDesmos() {
     if (!elt) return;
     
     desmosCalculator = Desmos.GraphingCalculator(elt, {
-        keypad: true,
-        graphpaper: true,
-        expressions: true,
-        settingsMenu: true,
-        zoomButtons: true,
-        expressionsTopbar: true,
-        pointsOfInterest: true,
-        trace: true,
-        border: false,
-        colors: {
-            grid: '#ccc',
-            axes: '#000'
-        }
-    });
+    keypad: true,
+    graphpaper: true,
+    expressions: true,
+    settingsMenu: true,
+    zoomButtons: true,
+    expressionsTopbar: true,
+    pointsOfInterest: true,
+    trace: true,
+    border: false
+});
     
     // Set default view
     desmosCalculator.setMathBounds({
@@ -3102,15 +3228,15 @@ function plotCustomEquation() {
     document.getElementById('desmosEquation').value = '';
 }
 
-// Get random color for graphs
+// Get random color for graphs 
 function getRandomColor() {
     const colors = [
-        Desmos.Colors.BLUE,
-        Desmos.Colors.RED,
-        Desmos.Colors.GREEN,
-        Desmos.Colors.PURPLE,
-        Desmos.Colors.ORANGE,
-        Desmos.Colors.BLACK
+        'RED',
+        'BLUE',
+        'GREEN',
+        'PURPLE',
+        'ORANGE',
+        'BLACK'
     ];
     return colors[Math.floor(Math.random() * colors.length)];
 }
@@ -3191,5 +3317,4 @@ document.getElementById("fecharLousa").addEventListener("click", () => {
 
     
 });
-
 
