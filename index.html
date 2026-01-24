@@ -28,8 +28,6 @@
 
 <body>
     
-       
-    
        <button id="openCalc" class="open-calc">🧮</button> 
        <button class="abrir-lousa-container" id="abrirLousa">🖌️</button> 
        <button id="fecharLousa">❌</button> 
@@ -39,9 +37,7 @@
     <!-- ===== MAIN CONTAINER ===== -->
     <div class="container">
         
-        <div id="contt">
-           <button id="toggleTheme">💡</button>
-        </div>
+        
         
         <h1 id="ms">Math Solver</h1>
         <h4>Choose the equation type:</h4>
@@ -59,7 +55,7 @@
 
         <!-- ===== LINEAR EQUATION ===== -->
         <div id="linear" class="secao" style="display:none;">
-            <h1>• Linear Equation Solver</h1>
+            <h1>• Linear Equation/Inequality Solver</h1>
 
             <div class="coeficientes-container">
                 <div class="coeficiente-input">
@@ -104,7 +100,7 @@
 
         <!-- ===== QUADRATIC EQUATION ===== -->
         <div id="quadratic" class="secao" style="display:none;">
-            <h1>• Quadratic Equation Solver</h1>
+            <h1>• Quadratic Equation/Inequality Solver</h1>
 
             <div class="coeficientes-container">
                 <div class="coeficiente-input">
@@ -259,7 +255,7 @@
 
         <!-- ===== EXPONENTIAL EQUATION ===== -->
         <div id="exponential" class="secao" style="display:none;">
-            <h1>• Exponential Equation Solver</h1>
+            <h1>• Exponential Equation/Inequality Solver</h1>
 
             <div class="coeficientes-container">
                 <div class="coeficiente-input">
@@ -309,7 +305,7 @@
 
         <!-- ===== LOGARITHMIC EQUATION ===== -->
         <div id="logarithmic" class="secao" style="display:none;">
-            <h1>• Logarithmic Equation Solver</h1>
+            <h1>• Logarithmic Equation/Inequality Solver</h1>
 
             <div class="coeficientes-container">
                 <div class="coeficiente-input">
@@ -354,7 +350,7 @@
 
         <!-- ===== TRIGONOMETRIC EQUATION ===== -->
         <div id="trigonometric" class="secao" style="display:none;">
-            <h1>• Trigonometric Equation Solver</h1>
+            <h1>• Trigonometric Equation/Inequality Solver</h1>
 
             <div class="coeficientes-container">
                 <div class="coeficiente-input">
@@ -406,16 +402,38 @@
     </div>
 
     <!-- ===== DIGITAL BLACKBOARD ===== -->
-    <div class="lousa-container" id="lousaContainer" style="display: none;">
-        <canvas id="lousa" width="1000" height="400"></canvas>
+<div class="lousa-container" id="lousaContainer" style="display: none;">
+    
+    
+    <canvas id="lousa" width="1000" height="400"></canvas>
 
-        <div class="tools">
-            <button id="pencil">Pencil ✏️</button>
-            <button id="eraser">Eraser 🧽</button>
-            <button id="clear">Clear All 🧼</button>
-            
+    <div class="tools">
+        <button id="pencil" class="tool-btn active">✏️ Pencil</button>
+        <button id="eraser" class="tool-btn">🧽 Eraser</button>
+        <button id="clear" class="tool-btn">🧼 Clean All</button>
+        
+        <div class="color-picker">
+            <input type="color" id="colorPicker" value="#000000" title="Cor do pincel">
+            <div class="color-preview" id="colorPreview"></div>
+        </div>
+        
+        <div class="brush-size">
+            <label for="brushSize">Size: <span id="brushSizeValue">3</span>px</label>
+            <input type="range" id="brushSize" min="1" max="50" value="3">
+        </div>
+        
+        <div class="resize-tools">
+            <button id="zoomIn" class="resize-btn">+</button>
+            <button id="zoomOut" class="resize-btn">-</button>
+            <button id="resetZoom" class="resize-btn">↺</button>
+        </div>
+        
+        <div class="color-wheel-container">
+            <div class="color-wheel" id="colorWheel"></div>
+            <div class="color-wheel-preview" id="wheelColorPreview"></div>
         </div>
     </div>
+</div>
 
     <!-- ===== DESMOS GRAPHING CALCULATOR ===== -->
     <div class="desmos-container" id="desmosContainer" style="display: none;">
