@@ -2007,12 +2007,8 @@ function rgbToHex(r, g, b) {
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 }
 
-// Event listeners para ferramentas
-document.getElementById("clear").addEventListener("click", () => {
-    
-        clearCanvas();
-    
-});
+// Limpa tudo
+document.getElementById("clear").onclick = clearCanvas;
 
 document.getElementById("pencil").addEventListener("click", () => {
     config.currentTool = "pencil";
@@ -3317,5 +3313,6 @@ document.getElementById("fecharLousa").addEventListener("click", () => {
 
     
 });
+
 
 
