@@ -2009,9 +2009,9 @@ function rgbToHex(r, g, b) {
 
 // Event listeners para ferramentas
 document.getElementById("clear").addEventListener("click", () => {
-    if (confirm("Are you sure you want to clear the canvas?")) {
+    
         clearCanvas();
-    }
+    
 });
 
 document.getElementById("pencil").addEventListener("click", () => {
@@ -3317,4 +3317,5 @@ document.getElementById("fecharLousa").addEventListener("click", () => {
 
     
 });
+
 
